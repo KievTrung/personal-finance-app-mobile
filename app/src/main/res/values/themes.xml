@@ -1,0 +1,9 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.PersonalFinance" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your light theme here. -->
+         <item name="android:statusBarColor">#00000000</item>
+    </style>
+
+    <style name="Theme.PersonalFinance" parent="Base.Theme.PersonalFinance" />
+</resources>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_transaction"
+            android:icon="@drawable/transact_img"
+            android:title="Transactions"
+            />
+        <item
+            android:id="@+id/nav_budget"
+            android:title="Budget"
+            android:icon="@drawable/budget_img"
+            />
+        <item
+            android:id="@+id/nav_loan_debt"
+            android:title="Loan / Debt"
+            android:icon="@drawable/loaddebt_img"
+            />
+        <item
+            android:id="@+id/nav_notify"
+            android:title="Notifications"
+            android:icon="@drawable/notify_img"
+            />
+        <item android:title="Profile">
+            <menu>
+                <group android:checkableBehavior="single">
+                    <item
+                        android:id="@+id/nav_account"
+                        android:title="Account"
+                        android:icon="@drawable/account_img"
+                        />
+                    <item
+                        android:id="@+id/nav_setting"
+                        android:title="Settings"
+                        android:icon="@drawable/setting_img"
+                        />
+                    <item
+                        android:id="@+id/nav_logout"
+                        android:title="Log out"
+                        android:icon="@drawable/logout_img"
+                        />
+                </group>
+            </menu>
+        </item>
+    </group>
+</menu>
