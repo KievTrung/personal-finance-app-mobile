@@ -42,7 +42,7 @@ public class BillItemFragment extends Fragment implements View.OnClickListener{
     public void onClick(View view) {
         int id = view.getId();
         if (id == R.id.category_items_2_btn){
-            activity.replaceFragment(R.id.fragment_container, new CategoryFragment(), getContext(),true, null);
+            activity.replaceFragment(R.id.fragment_container, new CategoryFragment(), getContext(),true, null, null);
         }
     }
 }

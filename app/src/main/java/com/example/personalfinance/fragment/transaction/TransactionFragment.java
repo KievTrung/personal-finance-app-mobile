@@ -57,11 +57,11 @@ public class TransactionFragment extends Fragment implements View.OnClickListene
         viewType = ViewType.BOTH;
 
         //set up bar chart
-        activity.replaceFragment(R.id.chart_fragment_view, new ChartBarFragment(), getContext(), false, null);
+        activity.replaceFragment(R.id.chart_fragment_view, new ChartBarFragment(), getContext(), false, null, null);
         chart = Chart.BAR;
 
         //set up tool bar
-        activity.configToolBarTopRightBtn(activity, View.VISIBLE, R.drawable.wallet, (view)-> activity.replaceFragment(R.id.fragment_container, new WalletFragment(), getContext(), true, null));
+        activity.configToolBarTopRightBtn(activity, View.VISIBLE, R.drawable.wallet, (view)-> activity.replaceFragment(R.id.fragment_container, new WalletFragment(), getContext(), true, null, null));
         activity.setToolBarMenuBtnVisibility(activity, View.VISIBLE);
         activity.setToolBarHeaderText(activity, null);
 
@@ -78,7 +78,7 @@ public class TransactionFragment extends Fragment implements View.OnClickListene
     public void onClick(View view) {
         int id = view.getId();
         if (id == R.id.wallet_detail_btn){
-            activity.replaceFragment(R.id.fragment_container, new WalletInfoFragment(), getContext(), true, null);
+            activity.replaceFragment(R.id.fragment_container, new WalletInfoFragment(), getContext(), true, null, null);
         }
         else if (id == R.id.create_transaction_btn){
             SingleChoiceDialogFragment singleChoiceDialogFragment = getSingleChoiceForNewTransactionDialogFragment();
@@ -114,7 +114,7 @@ public class TransactionFragment extends Fragment implements View.OnClickListene
             else result.putString("bundleKey", "bill");
             getParentFragmentManager().setFragmentResult("requestKey", result);
 
-            activity.replaceFragment(R.id.fragment_container, new ActualTransactionFragment(), getContext(), true, null);
+            activity.replaceFragment(R.id.fragment_container, new ActualTransactionFragment(), getContext(), true, null, null);
         });
         return singleChoiceDialogFragment;
     }
@@ -164,11 +164,11 @@ public class TransactionFragment extends Fragment implements View.OnClickListene
         }
         singleChoiceDialogFragment.setPositiveListener((dialog, i) -> {
             if (singleChoiceDialogFragment.getChoice().equals(choices[0]) && chart != Chart.BAR){
-                activity.replaceFragment(R.id.chart_fragment_view, new ChartBarFragment(), getContext(), false, null);
+                activity.replaceFragment(R.id.chart_fragment_view, new ChartBarFragment(), getContext(), false, null, null);
                 chart = Chart.BAR;
             }
             else if (singleChoiceDialogFragment.getChoice().equals(choices[1]) && chart != Chart.PIE){
-                activity.replaceFragment(R.id.chart_fragment_view, new ChartPieFragment(), getContext(), false, null);
+                activity.replaceFragment(R.id.chart_fragment_view, new ChartPieFragment(), getContext(), false, null, null);
                 chart = Chart.PIE;
             }
         });

@@ -66,10 +66,10 @@ public class ActualTransactionFragment extends Fragment implements View.OnClickL
         else if (id == R.id.category_items_btn){
             switch(type){
                 case TRANSACTION:
-                    activity.replaceFragment(R.id.fragment_container, new CategoryFragment(), getContext(),true, null);
+                    activity.replaceFragment(R.id.fragment_container, new CategoryFragment(), getContext(),true, null, null);
                     break;
                 case BILL:
-                    activity.replaceFragment(R.id.fragment_container, new BillItemFragment(), getContext(), true, null);
+                    activity.replaceFragment(R.id.fragment_container, new BillItemFragment(), getContext(), true, null, null);
                     break;
             }
         }
@@ -87,7 +87,7 @@ public class ActualTransactionFragment extends Fragment implements View.OnClickL
             throw new RuntimeException(e);
         }
         singleChoiceDialogFragment.setPositiveListener((dialog, i) -> {
-            activity.replaceFragment(R.id.fragment_container, new PayLaterFragment(), getContext(), true, null);
+            activity.replaceFragment(R.id.fragment_container, new PayLaterFragment(), getContext(), true, null, null);
         });
         return singleChoiceDialogFragment;
     }

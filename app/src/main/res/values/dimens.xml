@@ -4,6 +4,7 @@
     <dimen name="textSizeTextViewHeader">24sp</dimen>
     <dimen name="textSizeButton">16sp</dimen>
     <dimen name="textSizeEditText">20sp</dimen>
- <!--   <dimen name="imageSize">null</dimen>-->
+    <dimen name="imageNormalSize">40dp</dimen>
+    <dimen name="imageSmallSize">30dp</dimen>
     <dimen name="linearLayoutPadding">20dp</dimen>
 </resources>

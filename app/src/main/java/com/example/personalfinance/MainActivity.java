@@ -90,10 +90,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        replaceFragment(R.id.fragment_container, new TransactionFragment(), this, false, null);
+        replaceFragment(R.id.fragment_container, new TransactionFragment(), this, false, null, null);
     }
 
-    public void replaceFragment(int fragmentContainer, Fragment fragment, Context context, boolean addBackStack, String name){
+    public void replaceFragment(int fragmentContainer, Fragment fragment, Context context, boolean addBackStack, String name, Bundle args){
         //set transition for fragment
         fragment.setEnterTransition(TransitionInflater.from(context).inflateTransition(R.transition.enter_from_right));
         fragment.setExitTransition(TransitionInflater.from(context).inflateTransition(R.transition.exit_to_left));
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         FragmentTransaction fragmentTransaction = getSupportFragmentManager()
                                                     .beginTransaction()
                                                     .setReorderingAllowed(true)
-                                                    .replace(fragmentContainer, fragment);
+                                                    .replace(fragmentContainer, fragment.getClass(), args);
 
         if (addBackStack) fragmentTransaction.addToBackStack(name).commit();
         else fragmentTransaction.commit();
@@ -138,27 +138,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.nav_transaction && currentFragment != FRAGMENT.FRAGMENT_TRANSACTION){
-            replaceFragment(R.id.fragment_container, new TransactionFragment(), this, false, null);
+            replaceFragment(R.id.fragment_container, new TransactionFragment(), this, false, null, null);
             currentFragment = FRAGMENT.FRAGMENT_TRANSACTION;
         }
         else if (id == R.id.nav_budget && currentFragment != FRAGMENT.FRAGMENT_BUDGET){
-            replaceFragment(R.id.fragment_container, new BudgetFragment(), this, false, null);
+            replaceFragment(R.id.fragment_container, new BudgetFragment(), this, false, null, null);
             currentFragment = FRAGMENT.FRAGMENT_BUDGET;
         }
         else if (id == R.id.nav_loan_debt && currentFragment != FRAGMENT.FRAGMENT_LOAN_DEBT){
-            replaceFragment(R.id.fragment_container, new LoanDebtFragment(), this, false, null);
+            replaceFragment(R.id.fragment_container, new LoanDebtFragment(), this, false, null, null);
             currentFragment = FRAGMENT.FRAGMENT_LOAN_DEBT;
         }
         else if (id == R.id.nav_notify && currentFragment != FRAGMENT.FRAGMENT_NOTIFY){
-            replaceFragment(R.id.fragment_container, new NotificationFragment(), this, false, null);
+            replaceFragment(R.id.fragment_container, new NotificationFragment(), this, false, null, null);
             currentFragment = FRAGMENT.FRAGMENT_NOTIFY;
         }
         else if (id == R.id.nav_setting && currentFragment != FRAGMENT.FRAGMENT_SETTING){
-            replaceFragment(R.id.fragment_container, new SettingFragment(), this, false, null);
+            replaceFragment(R.id.fragment_container, new SettingFragment(), this, false, null, null);
             currentFragment = FRAGMENT.FRAGMENT_SETTING;
         }
         else if (id == R.id.nav_account && currentFragment != FRAGMENT.FRAGMENT_ACCOUNT){
-            replaceFragment(R.id.fragment_container, new AccountFragment(), this, false, null);
+            replaceFragment(R.id.fragment_container, new AccountFragment(), this, false, null, null);
             currentFragment = FRAGMENT.FRAGMENT_ACCOUNT;
         }
         Log.d(TAG, "Run fragment: " + currentFragment);
