@@ -8,6 +8,7 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
 import com.example.personalfinance.datalayer.local.entities.Category;
+import com.example.personalfinance.datalayer.local.entities.Token;
 import com.example.personalfinance.datalayer.local.entities.Transact;
 import com.example.personalfinance.datalayer.local.entities.UseWallet;
 import com.example.personalfinance.datalayer.local.entities.User;
@@ -19,7 +20,8 @@ import com.example.personalfinance.datalayer.local.converters.LocalDateTimeConve
         Wallet.class,
         Category.class,
         UseWallet.class,
-        User.class
+        User.class,
+        Token.class
 }, version = 1)
 @TypeConverters({LocalDateTimeConverter.class})
 public abstract class AppLocalDatabase extends RoomDatabase {
@@ -28,6 +30,7 @@ public abstract class AppLocalDatabase extends RoomDatabase {
     public abstract UseWalletDao getUseWalletDao();
     public abstract CategoryDao getCategoryDao();
     public abstract UserDao getUserDao();
+    public abstract TokenDao getTokenDao();
 
     private static volatile AppLocalDatabase INSTANCE;
 

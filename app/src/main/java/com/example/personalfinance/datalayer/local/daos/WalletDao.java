@@ -18,24 +18,38 @@ public interface WalletDao {
     @Insert
     Completable insertWallet(Wallet wallet);
 
-    @Query("update wallet set wallet_title = :new_title where wallet_title = :old_title")
-    Completable udpateTitle(String old_title, String new_title);
+    @Query("update wallet set wallet_title = :new_title, syncState = :state where wallet_title = :old_title")
+    Completable updateTitle(String old_title, String new_title, SyncState state);
 
-    @Query("update wallet set wallet_amount = :wallet_amount where wallet_title = :title")
-    Completable udpateAmount(String title, Double wallet_amount);
+    @Query("update wallet set wallet_amount = :wallet_amount, syncState = :state where wallet_title = :title")
+    Completable updateAmount(String title, Double wallet_amount, SyncState state);
 
-    @Query("update wallet set wallet_description = :wallet_description where wallet_title = :title")
-    Completable updateSyncState(String title, String wallet_description);
+    @Query("update wallet set wallet_description = :wallet_description, syncState = :state where wallet_title = :title")
+    Completable updateDescription(String title, String wallet_description, SyncState state);
+
+    @Query("update wallet set last_sync_title = :title where wallet_title = :title")
+    Completable updateLastSyncTitle(String title);
+
+    //mark row as about to delete and not displaying
+    @Query("update wallet set syncState = :state where wallet_title = :title")
+    Completable deleteWallet(String title, SyncState state);
+
+    //completely remove from db
+    @Query("delete from wallet where wallet_title = :title")
+    Completable removeWallet(String title);
+
+    @Query("select syncState from wallet where wallet_title = :title")
+    Single<SyncState> getState(String title);
 
     @Query("update wallet set syncState = :state where wallet_title = :title")
-    Completable updateSyncState(String title, SyncState state);
-
-    @Query("update wallet set removeState = 'pending' where wallet_title = :title")
-    Completable deleteWallet(String title);
+    Completable setState(String title, SyncState state);
 
     @Query("select * from wallet")
     Single<List<WalletWithTransacts>> getWalletWithTransactList();
 
-    @Query("select * from wallet where removeState = 'active'")
-    Single<List<Wallet>> getAllWallets();
+    @Query("select * from wallet where syncState != :exclude_state")
+    Single<List<Wallet>> getAllWalletWithState(SyncState exclude_state);
+
+    @Query("select * from wallet")
+    Single<List<Wallet>> getAllWallet();
 }

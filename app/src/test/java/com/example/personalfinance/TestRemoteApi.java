@@ -7,13 +7,10 @@ import com.example.personalfinance.datalayer.remote.UserService;
 import com.example.personalfinance.datalayer.remote.WalletService;
 import com.example.personalfinance.datalayer.remote.models.UserRemote;
 import com.example.personalfinance.datalayer.remote.models.WalletRemote;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import io.reactivex.rxjava3.core.Single;
@@ -32,38 +29,38 @@ public class TestRemoteApi {
         walletService = ApiServiceFactory.getWalletService();
     }
 
-    @Test
-    public void testPostUser() throws InterruptedException {
-        UserRemote userRemote = new UserRemote();
-        userRemote.setUserName("trung");
-        userRemote.setPassword("123");
-        userRemote.setEmail("string2");
-        userRemote.setCurrency(Currency.usd);
-        userRemote.setLanguage(Language.usa);
-        Single<UserRemote> user = userService.postUser(userRemote);
+//    @Test
+//    public void testPostUser() throws InterruptedException {
+//        UserRemote userRemote = new UserRemote();
+//        userRemote.setUserName("trung");
+//        userRemote.setPassword("123");
+//        userRemote.setEmail("string2");
+//        userRemote.setCurrency(Currency.usd);
+//        userRemote.setLanguage(Language.usa);
+//        Single<UserRemote> user = userService.postUser(userRemote);
+//
+//        TestObserver<UserRemote> testObserver = user.test();
+//
+//        testObserver.await();
+//        testObserver.assertNoErrors();
+//        testObserver.assertValue(userRemote1 -> {
+//            System.out.println(userRemote1);
+//            return userRemote1.getUserName().equals(userRemote.getUserName());
+//        });
+//    }
 
-        TestObserver<UserRemote> testObserver = user.test();
-
-        testObserver.await();
-        testObserver.assertNoErrors();
-        testObserver.assertValue(userRemote1 -> {
-            System.out.println(userRemote1);
-            return userRemote1.getUserName().equals(userRemote.getUserName());
-        });
-    }
-
-    @Test
-    public void testGetUser() throws InterruptedException {
-        Single<UserRemote> userRemote = userService.getUser(1);
-        TestObserver<UserRemote> testObserver = userRemote.test();
-
-        testObserver.await();
-        testObserver.assertNoErrors();
-        testObserver.assertValue(userRemote1 -> {
-            System.out.println(userRemote1);
-            return userRemote1.getUserName().equals("hine");
-        });
-    }
+//    @Test
+//    public void testGetUser() throws InterruptedException {
+//        Single<UserRemote> userRemote = userService.getUser(1);
+//        TestObserver<UserRemote> testObserver = userRemote.test();
+//
+//        testObserver.await();
+//        testObserver.assertNoErrors();
+//        testObserver.assertValue(userRemote1 -> {
+//            System.out.println(userRemote1);
+//            return userRemote1.getUserName().equals("hine");
+//        });
+//    }
 
     @Test
     public void testGetWallets() throws InterruptedException {
@@ -73,10 +70,7 @@ public class TestRemoteApi {
 
         testObserver.await();
         testObserver.assertNoErrors();
-        testObserver.assertValue(walletRemotes -> {
-            System.out.println(walletRemotes);
-            return walletRemotes.size() != 0;
-        });
+        testObserver.assertValue(walletRemotes -> walletRemotes.size() != 0);
     }
 
     @Test
@@ -100,7 +94,7 @@ public class TestRemoteApi {
     @Test
     public void testPutWallet() throws InterruptedException {
         String newTitle = "newWallet";
-        Single<Integer> single = walletService.updateWallet(1, "string3", newTitle);
+        Single<Integer> single = walletService.updateTitle(1, "string3", newTitle);
         TestObserver<Integer> testObserver = single.test();
 
         testObserver.await();

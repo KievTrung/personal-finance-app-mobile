@@ -27,6 +27,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.personalfinance.fragment.AccountFragment;
 import com.example.personalfinance.fragment.BudgetFragment;
@@ -39,10 +40,11 @@ import com.example.personalfinance.fragment.transaction.WalletInfoFragment;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "kiev main";
     private Toolbar tb;
     private DrawerLayout dl;
     private NavigationView nv;
+    private MainActivityViewModel mainActivityViewModel;
 
     private enum FRAGMENT{
         FRAGMENT_TRANSACTION,
@@ -91,6 +93,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         replaceFragment(R.id.fragment_container, new TransactionFragment(), this, false, null, null);
+
+        //init view model
+        mainActivityViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
     }
 
     public void replaceFragment(int fragmentContainer, Fragment fragment, Context context, boolean addBackStack, String name, Bundle args){

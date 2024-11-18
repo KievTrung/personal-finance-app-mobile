@@ -25,57 +25,21 @@ import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiServiceFactory {
-    public static class TimeOutInteceptor implements Interceptor {
-        private int maxRequestCount;
-        private Long waitTime; //wait for 1s before making another request
 
-        public TimeOutInteceptor(int maxRequestCount, Long waitTime) {
-            this.maxRequestCount = maxRequestCount;
-            this.waitTime = waitTime;
-        }
+    public static class AuthenticateInterceptor implements Interceptor{
+        private String token;
 
-        @NonNull
-        @Override
-        public Response intercept(@NonNull Chain chain) throws IOException {
-            int requestCount = 0;
-            IOException exception = null;
-            while(requestCount < maxRequestCount)
-            {
-                try
-                {
-                    Response response = chain.proceed(chain.request());
-                    return response;
-                }
-                catch(SocketTimeoutException e){
-                    exception = e;
-                    try
-                    {
-                        Thread.sleep(waitTime);
-                    }
-                    catch(InterruptedException i){
-                        throw new RuntimeException();
-                    }
-                    waitTime *= 2; //double the amount of wait time after each request
-                    requestCount++;
-                }
-            }
-            throw exception;
-        }
-    }
-
-    public static class BasicAuthInteceptor implements Interceptor{
-        private String credentials;
-
-        public BasicAuthInteceptor(String username, String password){
-            this.credentials = Credentials.basic(username, password);
+        public AuthenticateInterceptor(String token){
+            this.token = Credentials.basic(username, password);
         }
 
         @NonNull
         @Override
         public Response intercept(@NonNull Chain chain) throws IOException {
             Request request = chain.request();
-            Request basicAuthRequest = request.newBuilder().header("Authorization", credentials).build();
-            return chain.proceed(basicAuthRequest);
+            if (token != null)
+                 return chain.proceed(request.newBuilder().header("Authorization", "Bearer " + token).build());
+            return chain.proceed(request);
         }
     }
 
@@ -89,16 +53,16 @@ public class ApiServiceFactory {
     private static final long TIME_OUT_INTERVAL = 30;
     private static final String username = "kiev";
     private static final String password = "trung";
-    private static final String domain = "http://localhost:8080/api/v1/";
+    private static final String domain = "http://10.0.2.2:8080/api/v1/";
+    private static String token = null;
 
     private static final Gson gson = new GsonBuilder()
             .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             .create();
 
     private static final OkHttpClient okHttpClient = new OkHttpClient.Builder()
-            .addInterceptor(new TimeOutInteceptor(MAX_REQUEST_COUNT, TIME_INTERVAL_BETWEEN_REQUEST))
             .addInterceptor(loggingInterceptor)
-//            .addInterceptor(new BasicAuthInteceptor(username, password))
+            .addInterceptor(new AuthenticateInterceptor(token))
             .connectTimeout(TIME_OUT_INTERVAL, TimeUnit.SECONDS)
             .readTimeout(TIME_OUT_INTERVAL, TimeUnit.SECONDS)
             .writeTimeout(TIME_OUT_INTERVAL, TimeUnit.SECONDS)

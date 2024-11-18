@@ -15,8 +15,10 @@ import org.junit.runner.RunWith;
 import static org.junit.Assert.*;
 
 import com.example.personalfinance.datalayer.local.daos.AppLocalDatabase;
+import com.example.personalfinance.datalayer.local.daos.TokenDao;
 import com.example.personalfinance.datalayer.local.daos.TransactDao;
 import com.example.personalfinance.datalayer.local.daos.WalletDao;
+import com.example.personalfinance.datalayer.local.entities.Token;
 import com.example.personalfinance.datalayer.local.entities.Transact;
 import com.example.personalfinance.datalayer.local.entities.Wallet;
 import com.example.personalfinance.datalayer.local.relationships.WalletWithTransacts;
@@ -31,6 +33,7 @@ import java.util.List;
  */
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
+    private TokenDao tokenDao;
     private WalletDao walletDao;
     private TransactDao transactDao;
     private AppLocalDatabase db;
@@ -41,11 +44,20 @@ public class ExampleInstrumentedTest {
         db = AppLocalDatabase.getInstance(context);
         transactDao = db.getTransactDao();
         walletDao = db.getWalletDao();
+        tokenDao = db.getTokenDao();
     }
 
     @After
     public void closeDb(){
         AppLocalDatabase.closeDb();
+    }
+
+    @Test
+    public void testTokenDao(){
+        String token = "123";
+
+        tokenDao.setToken(new Token(token)).test().assertNoErrors().assertComplete();
+        tokenDao.getToken().test().assertValue(s -> s.equals("123"));
     }
 
     @Test(expected = SQLiteConstraintException.class)

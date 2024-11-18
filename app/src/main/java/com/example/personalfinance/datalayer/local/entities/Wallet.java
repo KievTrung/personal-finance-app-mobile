@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import com.example.personalfinance.datalayer.local.enums.RemoveState;
 import com.example.personalfinance.datalayer.local.enums.SyncState;
 
 import java.util.Objects;
@@ -14,15 +13,22 @@ public class Wallet {
     @PrimaryKey
     @NonNull
     private String wallet_title;
+    private String last_sync_title;
     @NonNull
     private Double wallet_amount;
     private String wallet_description;
     @NonNull
     private SyncState syncState;
-    @NonNull
-    private RemoveState removeState;
 
     public Wallet(){}
+
+    public String getLast_sync_title() {
+        return last_sync_title;
+    }
+
+    public void setLast_sync_title(String last_sync_title) {
+        this.last_sync_title = last_sync_title;
+    }
 
     public String getWallet_title() {
         return wallet_title;
@@ -57,15 +63,6 @@ public class Wallet {
         this.syncState = syncState;
     }
 
-    @NonNull
-    public RemoveState getRemoveState() {
-        return removeState;
-    }
-
-    public void setRemoveState(@NonNull RemoveState removeState) {
-        this.removeState = removeState;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -79,14 +76,4 @@ public class Wallet {
         return Objects.hash(wallet_title, wallet_amount, wallet_description);
     }
 
-    @Override
-    public String toString() {
-        return "Wallet{" +
-                "wallet_title='" + wallet_title + '\'' +
-                ", wallet_amount=" + wallet_amount +
-                ", wallet_description='" + wallet_description + '\'' +
-                ", syncState=" + syncState +
-                ", removeState=" + removeState +
-                '}';
-    }
 }
