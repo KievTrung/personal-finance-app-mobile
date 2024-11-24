@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,7 +7,8 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_above="@id/add_item"
         android:orientation="vertical"
         android:padding="10dp">
 
@@ -19,7 +20,7 @@
             android:textSize="@dimen/textSizeTextView" />
 
         <EditText
-            android:id="@+id/editTextText3"
+            android:id="@+id/et_item_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
@@ -28,14 +29,14 @@
             android:textSize="@dimen/textSizeEditText" />
 
         <TextView
-            android:id="@+id/textView13"
+            android:id="@+id/abc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Amount :"
-            android:textSize="@dimen/textSizeTextView"/>
+            android:textSize="@dimen/textSizeTextView" />
 
         <EditText
-            android:id="@+id/editTextNumber2"
+            android:id="@+id/et_item_amount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
@@ -51,7 +52,7 @@
             android:textSize="@dimen/textSizeTextView" />
 
         <EditText
-            android:id="@+id/editTextNumber4"
+            android:id="@+id/et_item_quantity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
@@ -59,53 +60,37 @@
             android:inputType="number"
             android:textSize="@dimen/textSizeEditText" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/textView15"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:text="Category :"
-                android:textSize="@dimen/textSizeTextView" />
-
-            <Button
-                android:id="@+id/category_items_2_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Add"
-                android:textSize="@dimen/textSizeButton" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Items list :"
-            android:textSize="@dimen/textSizeTextView" />
-
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
-            android:layout_height="360dp"
-            android:clipChildren="false" />
+            android:layout_height="match_parent"
+            android:clipChildren="false"
+            android:id="@+id/recycler_view_items"/>
 
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:orientation="vertical"
-        android:padding="10dp">
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:id="@+id/add_item">
 
         <Button
-            android:id="@+id/button10"
+            android:id="@+id/add_item_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="Add item"
             android:textSize="@dimen/textSizeButton" />
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Cancel"
+            android:textSize="@dimen/textSizeButton"
+            android:visibility="visible" />
     </LinearLayout>
-</FrameLayout>
+</RelativeLayout>

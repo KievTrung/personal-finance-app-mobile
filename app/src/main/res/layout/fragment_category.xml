@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".fragment.transaction.CategoryFragment">
+    tools:context=".fragment.category.CategoryFragment">
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/category_tabLayout"
@@ -36,14 +36,6 @@
         android:layout_weight="1"
         android:orientation="horizontal"
         android:padding="10dp">
-
-        <Button
-            android:id="@+id/save_category_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Save"
-            android:textSize="@dimen/textSizeButton"/>
 
         <Button
             android:id="@+id/new_category_btn"

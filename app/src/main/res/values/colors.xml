@@ -2,5 +2,6 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="positive_money">#29FF2E</color>
+    <color name="earn">#41CD19</color>
+    <color name="spend">#D25C5C</color>
 </resources>

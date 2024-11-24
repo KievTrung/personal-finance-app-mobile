@@ -1,6 +1,5 @@
 package com.example.personalfinance.fragment.transaction;
 
-import android.app.Activity;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -12,7 +11,7 @@ import android.widget.Button;
 
 import com.example.personalfinance.MainActivity;
 import com.example.personalfinance.R;
-import com.example.personalfinance.fragment.dialogFragment.DateTimePickerDialogFragment;
+import com.example.personalfinance.fragment.dialog.DateTimePickerDialogFragment;
 
 public class PayLaterFragment extends Fragment implements View.OnClickListener{
     private static final String TAG = "PayLaterFragment";
@@ -29,7 +28,8 @@ public class PayLaterFragment extends Fragment implements View.OnClickListener{
 
     private void init(View v){
         activity = (MainActivity)getActivity();
-        activity.configToolbarToReturn(activity, getParentFragmentManager(), "Pay later");
+        activity.configToolbarToReturn(view -> getParentFragmentManager().popBackStack());
+        activity.setToolBarHeaderText("Pay later");
 
         ((Button)v.findViewById(R.id.pick_paylater_begin_date_btn)).setOnClickListener(this);
         ((Button)v.findViewById(R.id.pick_paylater_end_date_btn)).setOnClickListener(this);

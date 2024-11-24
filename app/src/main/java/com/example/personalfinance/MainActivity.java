@@ -1,15 +1,13 @@
 package com.example.personalfinance;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.transition.TransitionInflater;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -34,9 +32,8 @@ import com.example.personalfinance.fragment.BudgetFragment;
 import com.example.personalfinance.fragment.LoanDebtFragment;
 import com.example.personalfinance.fragment.NotificationFragment;
 import com.example.personalfinance.fragment.SettingFragment;
-import com.example.personalfinance.fragment.dialogFragment.SingleChoiceDialogFragment;
-import com.example.personalfinance.fragment.transaction.TransactionFragment;
-import com.example.personalfinance.fragment.transaction.WalletInfoFragment;
+import com.example.personalfinance.fragment.transaction.transaction.TransactionFragment;
+import com.example.personalfinance.fragment.transaction.wallet.WalletFragment;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -44,10 +41,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Toolbar tb;
     private DrawerLayout dl;
     private NavigationView nv;
-    private MainActivityViewModel mainActivityViewModel;
+    private MainActivityViewModel viewModel;
 
     private enum FRAGMENT{
         FRAGMENT_TRANSACTION,
+        FRAGMENT_WALLET,
         FRAGMENT_ACCOUNT,
         FRAGMENT_BUDGET,
         FRAGMENT_NOTIFY,
@@ -71,6 +69,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void init(){
+        //init view model
+        viewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
+
         tb = findViewById(R.id.tool_bar);
         nv = findViewById(R.id.nav_view);
         dl = findViewById(R.id.drawer_layout);
@@ -92,78 +93,93 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        replaceFragment(R.id.fragment_container, new TransactionFragment(), this, false, null, null);
-
-        //init view model
-        mainActivityViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
+        initOpenFragment();
     }
 
-    public void replaceFragment(int fragmentContainer, Fragment fragment, Context context, boolean addBackStack, String name, Bundle args){
+    public void replaceFragment(Fragment fragment, boolean addBackStack, Bundle args){
         //set transition for fragment
-        fragment.setEnterTransition(TransitionInflater.from(context).inflateTransition(R.transition.enter_from_right));
-        fragment.setExitTransition(TransitionInflater.from(context).inflateTransition(R.transition.exit_to_left));
+        fragment.setEnterTransition(TransitionInflater.from(getApplicationContext()).inflateTransition(R.transition.enter_from_right));
+        fragment.setExitTransition(TransitionInflater.from(getApplicationContext()).inflateTransition(R.transition.exit_to_left));
         //move to new fragment
         FragmentTransaction fragmentTransaction = getSupportFragmentManager()
                                                     .beginTransaction()
                                                     .setReorderingAllowed(true)
-                                                    .replace(fragmentContainer, fragment.getClass(), args);
+                                                    .replace(R.id.fragment_container, fragment.getClass(), args);
 
-        if (addBackStack) fragmentTransaction.addToBackStack(name).commit();
+        if (addBackStack) fragmentTransaction.addToBackStack(null).commit();
         else fragmentTransaction.commit();
     }
 
-    public void configToolbarToReturn(Activity activity, FragmentManager fragmentManager, String title){
-        configToolBarTopRightBtn(activity, View.VISIBLE, R.drawable.arrow_back_icon, (view)-> fragmentManager.popBackStack());
-        setToolBarMenuBtnVisibility(activity, View.INVISIBLE);
-        setToolBarHeaderText(activity, title);
+    public void configToolbarToReturn(View.OnClickListener listener){
+        configToolBarTopRightBtn(View.VISIBLE, R.drawable.arrow_back_icon, listener);
+        setToolBarMenuBtnVisibility(View.INVISIBLE);
     }
 
-    public void configToolBarTopRightBtn(Activity activity, int viewMode, int imageSrc, View.OnClickListener setAction){
-        ImageButton backBtn = getTopRightBtnReference(activity);
+    public void configToolBarTopRightBtn(int viewMode, int imageSrc, View.OnClickListener setAction){
+        ImageButton backBtn = getTopRightBtnReference(this);
         backBtn.setImageResource(imageSrc);
         backBtn.setOnClickListener(setAction);
         backBtn.setVisibility(viewMode);
     }
 
     public ImageButton getTopRightBtnReference(Activity activity){
-        return (ImageButton) activity.findViewById(R.id.toolbar_back);
+        return activity.findViewById(R.id.toolbar_back);
     }
 
-    public void setToolBarMenuBtnVisibility(Activity activity, int viewMode){
-        ImageButton menuBtn = activity.findViewById(R.id.toolbar_menu);
+    public void setToolBarReturnBtnVisibility(int viewMode){
+        ImageButton returnBtn = this.findViewById(R.id.toolbar_back);
+        returnBtn.setVisibility(viewMode);
+    }
+
+    public void setToolBarMenuBtnVisibility(int viewMode){
+        ImageButton menuBtn = this.findViewById(R.id.toolbar_menu);
         menuBtn.setVisibility(viewMode);
     }
 
-    public void setToolBarHeaderText(Activity activity, String text){
-        TextView textView = activity.findViewById(R.id.toolbar_text);
+    public void setToolBarHeaderText(String text){
+        TextView textView = this.findViewById(R.id.toolbar_text);
         textView.setText(text);
+    }
+
+    @SuppressLint("CheckResult")
+    public void initOpenFragment(){
+        viewModel.compositeDisposable.add(
+                viewModel
+                        .getUseWallet()
+                        .subscribe(walletModel -> {
+                            if (walletModel.getId() == -1)
+                                replaceFragment(new WalletFragment(), false, null);
+                            else
+                                replaceFragment(new TransactionFragment(),false, null);
+                        })
+        );
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.nav_transaction && currentFragment != FRAGMENT.FRAGMENT_TRANSACTION){
-            replaceFragment(R.id.fragment_container, new TransactionFragment(), this, false, null, null);
+            initOpenFragment();
             currentFragment = FRAGMENT.FRAGMENT_TRANSACTION;
         }
         else if (id == R.id.nav_budget && currentFragment != FRAGMENT.FRAGMENT_BUDGET){
-            replaceFragment(R.id.fragment_container, new BudgetFragment(), this, false, null, null);
+            replaceFragment(new BudgetFragment(), false, null);
             currentFragment = FRAGMENT.FRAGMENT_BUDGET;
         }
         else if (id == R.id.nav_loan_debt && currentFragment != FRAGMENT.FRAGMENT_LOAN_DEBT){
-            replaceFragment(R.id.fragment_container, new LoanDebtFragment(), this, false, null, null);
+            replaceFragment(new LoanDebtFragment(), false, null);
             currentFragment = FRAGMENT.FRAGMENT_LOAN_DEBT;
         }
         else if (id == R.id.nav_notify && currentFragment != FRAGMENT.FRAGMENT_NOTIFY){
-            replaceFragment(R.id.fragment_container, new NotificationFragment(), this, false, null, null);
+            replaceFragment(new NotificationFragment(), false, null);
             currentFragment = FRAGMENT.FRAGMENT_NOTIFY;
         }
         else if (id == R.id.nav_setting && currentFragment != FRAGMENT.FRAGMENT_SETTING){
-            replaceFragment(R.id.fragment_container, new SettingFragment(), this, false, null, null);
+            replaceFragment(new SettingFragment(), false, null);
             currentFragment = FRAGMENT.FRAGMENT_SETTING;
         }
         else if (id == R.id.nav_account && currentFragment != FRAGMENT.FRAGMENT_ACCOUNT){
-            replaceFragment(R.id.fragment_container, new AccountFragment(), this, false, null, null);
+            replaceFragment(new AccountFragment(), false, null);
             currentFragment = FRAGMENT.FRAGMENT_ACCOUNT;
         }
         Log.d(TAG, "Run fragment: " + currentFragment);

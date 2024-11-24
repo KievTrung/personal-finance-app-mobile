@@ -13,15 +13,14 @@ import io.reactivex.rxjava3.core.Single;
 @Dao
 public interface UseWalletDao {
     @Query("delete from usewallet")
-    Completable deleteUseWallet();
+    void deleteUseWallet();
 
     @Insert
-    Completable insertUseWallet(UseWallet useWallet);
+    void insertUseWallet(UseWallet useWallet);
 
-    default Completable setUseWallet(UseWallet useWallet){
-        return deleteUseWallet().andThen(insertUseWallet(useWallet));
-    }
+    @Query("select id from usewallet limit 1")
+    long getUseWallet();
 
-    @Query("select wallet_title from usewallet limit 1")
-    Single<String> getUseWallet();
+    @Query("select id from usewallet limit 1")
+    Single<Integer> getUseWalletObservable();
 }

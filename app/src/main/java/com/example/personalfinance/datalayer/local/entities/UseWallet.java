@@ -7,45 +7,22 @@ import androidx.room.PrimaryKey;
 
 import java.util.Objects;
 
-@Entity(
-        foreignKeys = @ForeignKey(
-                entity = Wallet.class,
-                parentColumns = "wallet_title",
-                childColumns = "wallet_title",
-                onDelete = ForeignKey.CASCADE,
-                onUpdate = ForeignKey.CASCADE
-        )
-)
+@Entity
 public class UseWallet {
     @PrimaryKey
     @NonNull
-    private String wallet_title;
+    private Integer id;
 
-    public UseWallet() {
+    public UseWallet(Integer id) {
+        this.id = id;
     }
 
-    public UseWallet(String wallet_title){
-        this.wallet_title = wallet_title;
+    @NonNull
+    public Integer getId() {
+        return id;
     }
 
-    public String getWallet_title() {
-        return wallet_title;
-    }
-
-    public void setWallet_title(String wallet_title) {
-        this.wallet_title = wallet_title;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UseWallet useWallet = (UseWallet) o;
-        return Objects.equals(wallet_title, useWallet.wallet_title);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(wallet_title);
+    public void setId(@NonNull Integer id) {
+        this.id = id;
     }
 }

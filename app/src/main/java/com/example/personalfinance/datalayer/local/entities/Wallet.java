@@ -2,32 +2,33 @@ package com.example.personalfinance.datalayer.local.entities;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 import com.example.personalfinance.datalayer.local.enums.SyncState;
 
 import java.util.Objects;
 
-@Entity
+@Entity(indices = {@Index(value = {"wallet_title"}, unique = true)})
 public class Wallet {
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
+    private Integer id;
     @NonNull
     private String wallet_title;
-    private String last_sync_title;
     @NonNull
     private Double wallet_amount;
     private String wallet_description;
     @NonNull
-    private SyncState syncState;
+    private SyncState syncState; //this will be set by sync manager
 
     public Wallet(){}
 
-    public String getLast_sync_title() {
-        return last_sync_title;
+    public Integer getId() {
+        return id;
     }
 
-    public void setLast_sync_title(String last_sync_title) {
-        this.last_sync_title = last_sync_title;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getWallet_title() {
@@ -64,16 +65,13 @@ public class Wallet {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Wallet wallet = (Wallet) o;
-        return Objects.equals(wallet_title, wallet.wallet_title) && Objects.equals(wallet_amount, wallet.wallet_amount) && Objects.equals(wallet_description, wallet.wallet_description);
+    public String toString() {
+        return "Wallet{" +
+                "id=" + id +
+                ", wallet_title='" + wallet_title + '\'' +
+                ", wallet_amount=" + wallet_amount +
+                ", wallet_description='" + wallet_description + '\'' +
+                ", syncState=" + syncState +
+                '}';
     }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(wallet_title, wallet_amount, wallet_description);
-    }
-
 }

@@ -2,66 +2,77 @@ package com.example.personalfinance.datalayer.local.entities;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-import java.util.Objects;
+import com.example.personalfinance.datalayer.local.enums.CategoryType;
+import com.example.personalfinance.datalayer.local.enums.SyncState;
 
-@Entity
+@Entity(indices = {@Index(value = {"categoryName", "categoryType"}, unique = true)})
 public class Category {
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
+    private Integer id;
     @NonNull
-    private String category_id;
-    private String image;
+    private String categoryName;
+    private String last_sync_name;
     @NonNull
-    private Boolean user_defind;
+    private CategoryType categoryType;
+    @NonNull
+    private SyncState syncState;
 
     public Category(){}
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getLast_sync_name() {
+        return last_sync_name;
+    }
+
+    public void setLast_sync_name(String last_sync_name) {
+        this.last_sync_name = last_sync_name;
+    }
+
     @NonNull
-    public String getCategory_id() {
-        return category_id;
+    public SyncState getSyncState() {
+        return syncState;
     }
 
-    public void setCategory_id(@NonNull String category_id) {
-        this.category_id = category_id;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
+    public void setSyncState(@NonNull SyncState syncState) {
+        this.syncState = syncState;
     }
 
     @NonNull
-    public Boolean getUser_defind() {
-        return user_defind;
+    public String getCategoryName() {
+        return categoryName;
     }
 
-    public void setUser_defind(@NonNull Boolean user_defind) {
-        this.user_defind = user_defind;
+    public void setCategoryName(@NonNull String categoryName) {
+        this.categoryName = categoryName;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Category category = (Category) o;
-        return Objects.equals(category_id, category.category_id) && Objects.equals(image, category.image) && Objects.equals(user_defind, category.user_defind);
+    @NonNull
+    public CategoryType getCategoryType() {
+        return categoryType;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(category_id, image, user_defind);
+    public void setCategoryType(@NonNull CategoryType categoryType) {
+        this.categoryType = categoryType;
     }
 
     @Override
     public String toString() {
         return "Category{" +
-                "category_id='" + category_id + '\'' +
-                ", image='" + image + '\'' +
-                ", user_defind=" + user_defind +
+                "categoryId=" + id +
+                ", categoryName='" + categoryName + '\'' +
+                ", last_sync_name='" + last_sync_name + '\'' +
+                ", categoryType=" + categoryType +
+                ", syncState=" + syncState +
                 '}';
     }
 }

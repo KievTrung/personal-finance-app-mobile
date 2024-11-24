@@ -4,13 +4,14 @@
     android:id="@+id/wallet_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment.transaction.WalletFragment">
+    tools:context=".fragment.transaction.wallet.WalletFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/wallet_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/create_wallet_btn"/>
+        android:layout_above="@id/create_wallet_btn"
+        />
 
     <Button
         android:id="@+id/create_wallet_btn"

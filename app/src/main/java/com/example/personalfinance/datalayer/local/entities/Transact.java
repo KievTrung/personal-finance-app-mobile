@@ -6,60 +6,91 @@ import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
 import com.example.personalfinance.datalayer.local.enums.Period;
+import com.example.personalfinance.datalayer.local.enums.SyncState;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Entity(
         foreignKeys = {
                 @ForeignKey(
                         entity = Wallet.class,
-                        parentColumns = "wallet_title",
-                        childColumns = "wallet_title",
-                        onDelete = ForeignKey.RESTRICT,
+                        parentColumns = "id",
+                        childColumns = "wallet_id",
+                        onDelete = ForeignKey.CASCADE,
                         onUpdate = ForeignKey.CASCADE
                 ),
                 @ForeignKey(
                         entity = Category.class,
-                        parentColumns = "category_id",
+                        parentColumns = "id",
                         childColumns = "category_id",
                         onDelete = ForeignKey.RESTRICT,
                         onUpdate = ForeignKey.CASCADE
                 )
         }
 )
-public class Transact {
+public class Transact{
+    public enum Type{ transaction, bill}
+
     @PrimaryKey(autoGenerate = true)
-    private Integer tran_id;
+    private Integer id;
     @NonNull
-    private String wallet_title;
+    private Integer wallet_id;
     @NonNull
-    private String tran_title;
+    private Integer category_id;
+    private Type type;
     @NonNull
-    private String category_id;
+    private String title;
     @NonNull
     private LocalDateTime date_time;
     @NonNull
-    private Long tran_amount;
+    private Double amount;
     private Period auto_tran;
-    private String tran_description;
+    private String description;
+    private SyncState syncState;
 
-    public Transact(){}
+    public Transact() {}
 
-    public String getWallet_title() {
-        return wallet_title;
+    public Integer getId() {
+        return id;
     }
 
-    public void setWallet_title(String wallet_title) {
-        this.wallet_title = wallet_title;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public String getTran_description() {
-        return tran_description;
+    public Type getType() {
+        return type;
     }
 
-    public void setTran_description(String tran_description) {
-        this.tran_description = tran_description;
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    @NonNull
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(@NonNull String title) {
+        this.title = title;
+    }
+
+    @NonNull
+    public LocalDateTime getDate_time() {
+        return date_time;
+    }
+
+    public void setDate_time(@NonNull LocalDateTime date_time) {
+        this.date_time = date_time;
+    }
+
+    @NonNull
+    public Double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(@NonNull Double amount) {
+        this.amount = amount;
     }
 
     public Period getAuto_tran() {
@@ -70,83 +101,52 @@ public class Transact {
         this.auto_tran = auto_tran;
     }
 
-    public Long getTran_amount() {
-        return tran_amount;
+    public String getDescription() {
+        return description;
     }
 
-    public void setTran_amount(Long tran_amount) {
-        this.tran_amount = tran_amount;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public LocalDateTime getDate_time() {
-        return date_time;
+    public SyncState getSyncState() {
+        return syncState;
     }
 
-    public void setDate_time(LocalDateTime date_time) {
-        this.date_time = date_time;
-    }
-
-    public String getTran_title() {
-        return tran_title;
-    }
-
-    public void setTran_title(String tran_title) {
-        this.tran_title = tran_title;
-    }
-
-    public Integer getTran_id() {
-        return tran_id;
-    }
-
-    public void setTran_id(Integer tran_id) {
-        this.tran_id = tran_id;
+    public void setSyncState(SyncState syncState) {
+        this.syncState = syncState;
     }
 
     @NonNull
-    public String getCategory_id() {
+    public Integer getWallet_id() {
+        return wallet_id;
+    }
+
+    public void setWallet_id(@NonNull Integer wallet_id) {
+        this.wallet_id = wallet_id;
+    }
+
+    @NonNull
+    public Integer getCategory_id() {
         return category_id;
     }
 
-    public void setCategory_id(@NonNull String category_id) {
+    public void setCategory_id(@NonNull Integer category_id) {
         this.category_id = category_id;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Transact transact = (Transact) o;
-        return Objects.equals(tran_id, transact.tran_id) &&
-                Objects.equals(wallet_title, transact.wallet_title)
-                && Objects.equals(tran_title, transact.tran_title)
-                && Objects.equals(date_time, transact.date_time)
-                && Objects.equals(category_id, transact.category_id)
-                && Objects.equals(tran_amount, transact.tran_amount)
-                && auto_tran == transact.auto_tran
-                && Objects.equals(tran_description, transact.tran_description);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(tran_id,
-                wallet_title,
-                tran_title,
-                date_time,
-                tran_amount,
-                auto_tran,
-                tran_description);
     }
 
     @Override
     public String toString() {
         return "Transact{" +
-                "tran_id=" + tran_id +
-                ", wallet_title='" + wallet_title + '\'' +
-                ", tran_title='" + tran_title + '\'' +
+                "wallet_id=" + wallet_id +
+                ", category_id=" + category_id +
+                ", id=" + id +
+                ", title='" + title + '\'' +
                 ", date_time=" + date_time +
-                ", tran_amount=" + tran_amount +
+                ", amount=" + amount +
                 ", auto_tran=" + auto_tran +
-                ", tran_description='" + tran_description + '\'' +
+                ", description='" + description + '\'' +
+                ", syncState=" + syncState +
                 '}';
     }
 }

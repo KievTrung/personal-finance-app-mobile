@@ -3,13 +3,11 @@ package com.example.personalfinance.datalayer.local.daos;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
-import androidx.room.Transaction;
 
-import com.example.personalfinance.datalayer.local.entities.Token;
+import com.example.personalfinance.datalayer.local.entities.auxiliry.Token;
 
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
 @Dao
 public interface TokenDao {

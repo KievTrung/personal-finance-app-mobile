@@ -7,21 +7,28 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
+import com.example.personalfinance.datalayer.local.daos.auxiliry.DeletedRowDao;
 import com.example.personalfinance.datalayer.local.entities.Category;
-import com.example.personalfinance.datalayer.local.entities.Token;
+import com.example.personalfinance.datalayer.local.entities.auxiliry.DeletedRow;
+import com.example.personalfinance.datalayer.local.entities.Item;
+import com.example.personalfinance.datalayer.local.entities.auxiliry.Token;
 import com.example.personalfinance.datalayer.local.entities.Transact;
 import com.example.personalfinance.datalayer.local.entities.UseWallet;
 import com.example.personalfinance.datalayer.local.entities.User;
 import com.example.personalfinance.datalayer.local.entities.Wallet;
 import com.example.personalfinance.datalayer.local.converters.LocalDateTimeConverter;
 
+import io.reactivex.rxjava3.core.Completable;
+
 @Database(entities = {
+        Item.class,
         Transact.class,
         Wallet.class,
         Category.class,
         UseWallet.class,
         User.class,
-        Token.class
+        Token.class,
+        DeletedRow.class
 }, version = 1)
 @TypeConverters({LocalDateTimeConverter.class})
 public abstract class AppLocalDatabase extends RoomDatabase {
@@ -31,6 +38,8 @@ public abstract class AppLocalDatabase extends RoomDatabase {
     public abstract CategoryDao getCategoryDao();
     public abstract UserDao getUserDao();
     public abstract TokenDao getTokenDao();
+    public abstract ItemDao getItemDao();
+    public abstract DeletedRowDao getDeletedRowDao();
 
     private static volatile AppLocalDatabase INSTANCE;
 
@@ -44,6 +53,15 @@ public abstract class AppLocalDatabase extends RoomDatabase {
             }
         }
         return INSTANCE;
+    }
+
+    public static Completable executeTransaction(Runnable runnable) throws Exception {
+        if (INSTANCE.isOpen()){
+            return Completable.fromAction(() -> INSTANCE.runInTransaction(runnable));
+        }
+        else{
+            throw new Exception("instance is closed");
+        }
     }
 
     public static void closeDb(){

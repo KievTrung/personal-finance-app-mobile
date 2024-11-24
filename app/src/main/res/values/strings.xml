@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">PersonalFinance</string>
     <string name="domain">testing</string>
+    <string-array name="period_items">
+        <item>NONE</item>
+        <item>DATE</item>
+        <item>MONTH</item>
+        <item>YEAR</item>
+    </string-array>
 </resources>

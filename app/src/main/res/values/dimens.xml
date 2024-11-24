@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="textSizeTextView">18sp</dimen>
+    <dimen name="textSizeTextViewSmall">14sp</dimen>
     <dimen name="textSizeTextViewHeader">24sp</dimen>
     <dimen name="textSizeButton">16sp</dimen>
     <dimen name="textSizeEditText">20sp</dimen>
     <dimen name="imageNormalSize">40dp</dimen>
     <dimen name="imageSmallSize">30dp</dimen>
+    <dimen name="imageSmallerSize">20dp</dimen>
     <dimen name="linearLayoutPadding">20dp</dimen>
 </resources>

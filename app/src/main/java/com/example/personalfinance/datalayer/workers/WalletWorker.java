@@ -12,10 +12,8 @@ import com.example.personalfinance.datalayer.local.daos.AppLocalDatabase;
 import com.example.personalfinance.datalayer.local.daos.UserDao;
 import com.example.personalfinance.datalayer.local.daos.WalletDao;
 import com.example.personalfinance.datalayer.local.entities.Wallet;
-import com.example.personalfinance.datalayer.local.enums.SyncState;
 import com.example.personalfinance.datalayer.remote.ApiServiceFactory;
 import com.example.personalfinance.datalayer.remote.WalletService;
-import com.example.personalfinance.datalayer.repositories.WalletRepository;
 
 import java.util.List;
 
@@ -67,6 +65,7 @@ public class WalletWorker extends RxWorker {
     }
 
     private Completable sendUpdateRequest(Integer userId, Wallet wallet){
+        /*
         //get wallet state
         SyncState syncState = wallet.getSyncState();
 
@@ -75,22 +74,22 @@ public class WalletWorker extends RxWorker {
 
         //check for each wallet if it can be persist to remote
         switch(syncState){
-            case not_delete_sync:
+            case not_sync_delete:
                 return walletService
                         .deleteWallet(userId, wallet.getWallet_title())
                         .doOnSuccess(result -> Log.d(TAG, "sendUpdateRequest, delete : " + result))
                         .ignoreElement()
                         .andThen(walletDao.removeWallet(wallet.getWallet_title()))
                         .doOnComplete(() -> Log.d(TAG, "local, remove : " + wallet.getWallet_title()));
-            case not_insert_sync:
+            case not_sync_insert:
                 return walletService
                         .addWallet(userId, WalletRepository.toWalletRemote(wallet))
-                        .doOnSuccess(walletRemote -> Log.d(TAG, "sendUpdateRequest, insert : " + walletRemote))
+                        .doOnSuccess(walletRemote -> Log.d(TAG, "sendUpdateRequest, insertTransact : " + walletRemote))
                         .ignoreElement()
                         .andThen(walletDao.setState(wallet.getWallet_title(), SyncState.synced))
                         .andThen(walletDao.updateLastSyncTitle(wallet.getWallet_title()))
-                        .doOnComplete(() -> Log.d(TAG, "local, insert complete"));
-            case not_update_sync:
+                        .doOnComplete(() -> Log.d(TAG, "local, insertTransact complete"));
+            case not_sync_update:
                 return walletService
                         .updateTitle(userId, wallet.getLast_sync_title(), wallet.getWallet_title())
                         .doOnSuccess(result -> Log.d(TAG, "sendUpdateRequest, update title: " + result))
@@ -107,12 +106,14 @@ public class WalletWorker extends RxWorker {
                         .ignoreElement()
                         .andThen(walletDao.setState(wallet.getWallet_title(), SyncState.synced))
                         .doOnComplete(() -> Log.d(TAG, "sendUpdateRequest, update complete"));
-            case delete_no_sync:
+            case no_sync_delete:
                 return walletDao
                         .removeWallet(wallet.getWallet_title())
                         .doOnComplete(() -> Log.d(TAG, "sendUpdateRequest, remove : " + wallet.getWallet_title()));
             case synced: default:
                 return Completable.complete();
         }
+         */
+        return Completable.complete();
     }
 }
