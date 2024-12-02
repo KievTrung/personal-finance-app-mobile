@@ -36,4 +36,7 @@ public interface CategoryDao {
 
     @Query("select * from category where id = :id")
     Single<Category> getCategory(Integer id);
+
+    @Query("select count(*) from transact where category_id = :id")
+    Single<Integer> countTransactHaveCategory(Integer id);
 }

@@ -1,5 +1,6 @@
 package com.example.personalfinance.fragment.transaction.transaction.adapter;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Build;
 import android.util.Log;
@@ -15,6 +16,9 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.personalfinance.R;
+import com.example.personalfinance.datalayer.local.entities.Transact;
+import com.example.personalfinance.datalayer.local.enums.Currency;
+import com.example.personalfinance.datalayer.local.repositories.UserRepository;
 import com.example.personalfinance.fragment.transaction.transaction.model.TransactModel;
 
 import java.time.format.DateTimeFormatter;
@@ -25,6 +29,7 @@ public class TransactionRecyclerViewAdapter extends RecyclerView.Adapter<Transac
     private ItemOnClickListener itemOnClickListener;
     private ItemOnLongClickListener itemOnLongClickListener;
     private List<TransactModel> transacts;
+    private Currency currency;
 
     public TransactionRecyclerViewAdapter(List<TransactModel> transacts){
         this.transacts = transacts;
@@ -38,6 +43,10 @@ public class TransactionRecyclerViewAdapter extends RecyclerView.Adapter<Transac
         this.itemOnLongClickListener = itemOnLongClickListener;
     }
 
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
+    }
+
     @NonNull
     @Override
     public TransactionRecyclerViewAdapter.TransactViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -45,19 +54,23 @@ public class TransactionRecyclerViewAdapter extends RecyclerView.Adapter<Transac
         return new TransactViewHolder(view);
     }
 
+    @SuppressLint("SetTextI18n")
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onBindViewHolder(@NonNull TransactionRecyclerViewAdapter.TransactViewHolder holder, int position) {
-        holder.title.setText(transacts.get(position).getTran_title());
-        holder.amount.setText(String.valueOf(transacts.get(position).getTran_amount()));
-        holder.date.setText(transacts.get(position).getDate_time().format(DateTimeFormatter.ofPattern("dd/MM/yyyy, HH:mm")));
-        holder.category.setText(transacts.get(position).getCategoryModel().getName());
-        holder.itemView.setOnClickListener(v -> itemOnClickListener.onClickListener(position));
+        TransactModel tran = transacts.get(position);
+        holder.title.setText(tran.getTran_title() + " " + ((tran.getType() == Transact.Type.bill) ? "(bill)" : ""));
+        holder.amount.setText(UserRepository.formatNumber(UserRepository.toCurrency(transacts.get(position).getTran_amount(), currency), true, currency));
+        holder.date.setText(tran.getDate_time().format(DateTimeFormatter.ofPattern("dd/MM/yyyy, HH:mm")));
+        holder.category.setText(tran.getCategoryModel().getName());
+        holder.itemView.setOnClickListener(v -> {
+            itemOnClickListener.onClickListener(position);
+        });
         holder.itemView.setOnLongClickListener(v -> {
             itemOnLongClickListener.onLongClickListener(position);
             return true;
         });
-        switch(transacts.get(position).getCategoryModel().getCategoryType()){
+        switch(tran.getCategoryModel().getCategoryType()){
             case spending:
                 holder.imageView.setImageResource(R.drawable.money_spend);
                 holder.cardView.setBackgroundColor(Color.parseColor("#D25C5C"));
@@ -98,7 +111,6 @@ public class TransactionRecyclerViewAdapter extends RecyclerView.Adapter<Transac
     }
 
     public void update(List<TransactModel> newData){
-        Log.d(TAG, "transact adapter update");
         transacts.clear();
         transacts.addAll(newData);
         notifyDataSetChanged();

@@ -68,6 +68,10 @@ public class SpendingCategoryViewModel extends AndroidViewModel {
         return categoryRepository.getAll(CategoryType.spending).doOnSuccess(categoryModels -> spendings = categoryModels);
     }
 
+    public Single<Integer> countTransact(Integer categoryId){
+        return categoryRepository.countTransactHaveCategory(categoryId);
+    }
+
     @Override
     protected void onCleared() {
         super.onCleared();

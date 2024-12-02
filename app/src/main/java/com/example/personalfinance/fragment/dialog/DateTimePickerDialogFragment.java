@@ -7,6 +7,7 @@ import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -23,7 +24,11 @@ import androidx.fragment.app.DialogFragment;
 import com.example.personalfinance.R;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
+import java.util.Optional;
+
+import kotlinx.coroutines.internal.LocalAtomics_commonKt;
 
 public class DateTimePickerDialogFragment extends DialogFragment implements View.OnClickListener{
     private static final String TAG = "kiev";
@@ -39,19 +44,30 @@ public class DateTimePickerDialogFragment extends DialogFragment implements View
             this.listener = listener;
         }
 
+        LocalDateTime now;
+
+        @RequiresApi(api = Build.VERSION_CODES.O)
+        public DatePickerDialogFragment(LocalDateTime now){
+            if (now == null)
+                this.now = LocalDateTime.now();
+            else
+                this.now = now;
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.O)
         @NonNull
         @Override
         public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-            final Calendar c = Calendar.getInstance();
-            int year = c.get(Calendar.YEAR);
-            int month = c.get(Calendar.MONTH);
-            int date = c.get(Calendar.DAY_OF_MONTH);
+            int year = now.getYear();
+            int month = now.getMonthValue();
+            int date = now.getDayOfMonth();
 
-            return new DatePickerDialog(getActivity(), this, year, month, date);
+            return new DatePickerDialog(getActivity(), this, year, month-1, date);
         }
 
         @Override
         public void onDateSet(DatePicker datePicker, int year, int month, int date) {
+            month++;
             listener.onConfirmClick(year, month, date);
         }
     }
@@ -78,7 +94,6 @@ public class DateTimePickerDialogFragment extends DialogFragment implements View
 
         @Override
         public void onTimeSet(TimePicker timePicker, int hourOfDay, int minute) {
-            // TODO: 10/27/2024 add functionality
             listener.onConfirmClick(hourOfDay, minute);
         }
     }
@@ -89,7 +104,7 @@ public class DateTimePickerDialogFragment extends DialogFragment implements View
     private Integer hourOfDay = null;
     private Integer minute = null;
     private TextView textView;
-    private String date_ = "";
+    private String date__ = "";
     private String time = "";
 
     public interface ConfirmDateTimeDialogListener{
@@ -102,11 +117,17 @@ public class DateTimePickerDialogFragment extends DialogFragment implements View
         this.listener = listener;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public static LocalDateTime toLocalDateTime(int year, int month, int date, int hourOfDay, int minute){
-        return LocalDateTime.of(year, month, date, hourOfDay, minute);
+    LocalDateTime localDateTime;
+
+    public DateTimePickerDialogFragment(){
+        this.localDateTime = null;
     }
 
+    public DateTimePickerDialogFragment(LocalDateTime localDateTime){
+        this.localDateTime = localDateTime;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
@@ -118,16 +139,30 @@ public class DateTimePickerDialogFragment extends DialogFragment implements View
         v.findViewById(R.id.pick_time_btn).setOnClickListener(this);
         textView = v.findViewById(R.id.date_textView);
 
-        final Calendar c = Calendar.getInstance();
-        year = c.get(Calendar.YEAR);
-        month = c.get(Calendar.MONTH);
-        date = c.get(Calendar.DAY_OF_MONTH);
-        hourOfDay = c.get(Calendar.HOUR_OF_DAY);
-        minute = c.get(Calendar.MINUTE);
+        LocalDateTime now = LocalDateTime.now();
+        year = now.getYear();
+        month = now.getMonthValue();
+        date = now.getDayOfMonth();
+        hourOfDay = now.getHour();
+        minute = now.getMinute();
 
-        date_ = date + "/" + month + "/" + year;
+        date__ = date + "/" + month + "/" + year;
         time = hourOfDay + ":" + minute;
-        textView.setText(date_ + ", " + time);
+        textView.setText(date__ + ", " + time);
+
+        Optional<LocalDateTime> optionalS = Optional.ofNullable(localDateTime);
+        if (optionalS.isPresent()){
+            LocalDateTime date_ = optionalS.get();
+            year = date_.getYear();
+            month = date_.getMonthValue();
+            date = date_.getDayOfMonth();
+            hourOfDay = date_.getHour();
+            minute = date_.getMinute();
+
+            date__ = date + "/" + month + "/" + year;
+            time = hourOfDay + ":" + minute;
+            textView.setText(date__ + ", " + time);
+        }
 
         builder.setView(v)
                 .setPositiveButton("Confirm", (dialog, i) -> {
@@ -138,11 +173,12 @@ public class DateTimePickerDialogFragment extends DialogFragment implements View
         return builder.create();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onClick(View view) {
         int id = view.getId();
         if (id == R.id.pick_date_btn){
-            DatePickerDialogFragment datePickerDialogFragment = new DatePickerDialogFragment();
+            DatePickerDialogFragment datePickerDialogFragment = new DatePickerDialogFragment(localDateTime);
             datePickerDialogFragment.setDateListener(this::onDateConfirmClick);
             datePickerDialogFragment.show(getParentFragmentManager(), TAG);
         }
@@ -157,14 +193,14 @@ public class DateTimePickerDialogFragment extends DialogFragment implements View
         this.year = year;
         this.month = month;
         this.date = date;
-        date_ = date + "/" + month + "/" + year;
-        textView.setText(date_ + ", " + time);
+        date__ = date + "/" + month + "/" + year;
+        textView.setText(date__ + ", " + time);
     }
 
     private void onTimeConfirmClick(int hourOfDay, int minute){
         this.hourOfDay = hourOfDay;
         this.minute = minute;
         time = hourOfDay + ":" + minute;
-        textView.setText(date_ + ", " + time);
+        textView.setText(date__ + ", " + time);
     }
 }

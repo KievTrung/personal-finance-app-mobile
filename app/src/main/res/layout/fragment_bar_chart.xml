@@ -1,14 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment.transaction.ChartBarFragment"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".fragment.transaction.transaction.ChartLineFragment">
 
-    <com.github.mikephil.charting.charts.BarChart
-        android:id="@+id/barChart"
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/lineChart"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="wrap_content"
+        android:layout_weight="1">
+
+    </com.github.mikephil.charting.charts.LineChart>
+
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="helo"
+        android:textSize="@dimen/textSizeTextViewSmall"
+        android:visibility="gone" />
 
 </LinearLayout>

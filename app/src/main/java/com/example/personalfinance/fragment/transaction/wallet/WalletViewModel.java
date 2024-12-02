@@ -5,6 +5,8 @@ import android.util.Log;
 
 import androidx.lifecycle.AndroidViewModel;
 
+import com.example.personalfinance.datalayer.local.enums.Currency;
+import com.example.personalfinance.datalayer.local.repositories.UserRepository;
 import com.example.personalfinance.datalayer.local.repositories.WalletRepository;
 
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ public class WalletViewModel extends AndroidViewModel{
     private List<WalletModel> wallets;
     public CompositeDisposable compositeDisposable;
     private final WalletRepository walletRepository;
+    private final UserRepository userRepository;
 
     public enum WalletAction { create, update, delete, update_transaction}
 
@@ -32,6 +35,7 @@ public class WalletViewModel extends AndroidViewModel{
         wallets = new ArrayList<>();
         compositeDisposable = new CompositeDisposable();
         walletRepository = new WalletRepository(getApplication().getApplicationContext());
+        userRepository = new UserRepository(application.getApplicationContext());
     }
 
     public boolean isWalletUse(){
@@ -115,10 +119,13 @@ public class WalletViewModel extends AndroidViewModel{
         return walletRepository.countTransactInWallet(id);
     }
 
+    public Single<Currency> getCurrency(){
+        return userRepository.getCurrency();
+    }
+
     @Override
     protected void onCleared() {
         super.onCleared();
-        Log.d(TAG, "onCleared: dispose");
         compositeDisposable.dispose();
     }
 }

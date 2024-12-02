@@ -1,8 +1,11 @@
 package com.example.personalfinance.fragment.category;
 
+import androidx.annotation.Nullable;
+
 import com.example.personalfinance.datalayer.local.enums.CategoryType;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class CategoryModel implements Serializable {
     private Integer id;
@@ -39,6 +42,19 @@ public class CategoryModel implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        CategoryModel that = (CategoryModel) object;
+        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && categoryType == that.categoryType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, categoryType);
     }
 
     @Override

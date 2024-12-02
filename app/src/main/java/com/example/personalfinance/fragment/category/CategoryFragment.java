@@ -107,7 +107,6 @@ public class CategoryFragment extends Fragment implements View.OnClickListener{
         confirm.setNoticeDialogListener((confirmDialog) -> {
             if (tabLayout.getSelectedTabPosition() == 0)
             {
-                //todo: need dispose
                 categoryModel.setCategoryType(CategoryType.spending);
                 earningViewModel.compositeDisposable.add(
                         spendingViewModel

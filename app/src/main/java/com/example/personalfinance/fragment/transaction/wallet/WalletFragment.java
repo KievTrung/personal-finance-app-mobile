@@ -81,7 +81,14 @@ public class WalletFragment extends Fragment{
         //init recycler view
         recyclerView = v.findViewById(R.id.wallet_recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(adapter);
+        //set currency before assign adapter
+        viewModel.compositeDisposable.add(
+                viewModel.getCurrency().subscribe(currency -> {
+                    adapter.setCurrency(currency);
+                    recyclerView.setAdapter(adapter);
+                }, throwable -> {
+                    //todo: run default config
+                }));
 
         //fetch data from local
         viewModel.compositeDisposable.add(
@@ -105,7 +112,6 @@ public class WalletFragment extends Fragment{
                 case create:
                     viewModel.compositeDisposable.add(
                             WalletViewModel.completable.subscribe(() -> {
-                                        Log.d(TAG, "onComplete: adding wallet");
                                         Toast.makeText(requireContext(), "Creating successfully", Toast.LENGTH_LONG).show();
                                         viewModel.fetchWallets().subscribe((walletModels) -> chooseWallet());
                                     }
@@ -116,6 +122,8 @@ public class WalletFragment extends Fragment{
                                         // display error msg
                                         if (throwable.getLocalizedMessage().contains("UNIQUE"))
                                             Toast.makeText(requireContext(), "Wallet title existed, please try again", Toast.LENGTH_LONG).show();
+                                        else
+                                            Toast.makeText(requireContext(), throwable.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                                     })
                     );
                     break;

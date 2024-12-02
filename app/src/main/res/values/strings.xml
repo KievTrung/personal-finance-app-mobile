@@ -7,4 +7,15 @@
         <item>MONTH</item>
         <item>YEAR</item>
     </string-array>
+    <string-array name="tran_type">
+        <item>ALL</item>
+        <item>BILL</item>
+        <item>TRANSACTION</item>
+    </string-array>
+    <string-array name="sort">
+        <item>HIGH TO LOW AMOUNT</item>
+        <item>LOW TO HIGH AMOUNT</item>
+        <item>LATEST TRANSACTION</item>
+        <item>OLDEST TRANSACTION</item>
+    </string-array>
 </resources>

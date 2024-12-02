@@ -46,8 +46,8 @@ dependencies {
     implementation("androidx.drawerlayout:drawerlayout:1.2.0")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     testImplementation("androidx.test:core:1.6.1")
-//    androidTestImplementation("androidx.arch.core:core-testing:2.2.0")
-//    testImplementation("androidx.lifecycle:lifecycle-testing:2.4.0")
+
+    implementation("com.aldoapps:autoformatedittext:0.9.3")
 
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")

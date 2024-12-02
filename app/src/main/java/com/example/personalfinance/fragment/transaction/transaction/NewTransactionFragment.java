@@ -11,6 +11,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,12 +28,13 @@ import com.example.personalfinance.MainActivity;
 import com.example.personalfinance.R;
 import com.example.personalfinance.datalayer.local.entities.Transact;
 import com.example.personalfinance.datalayer.local.enums.CategoryType;
+import com.example.personalfinance.datalayer.local.enums.Currency;
 import com.example.personalfinance.datalayer.local.enums.Period;
+import com.example.personalfinance.datalayer.local.repositories.UserRepository;
 import com.example.personalfinance.fragment.category.CategoryFragment;
 import com.example.personalfinance.fragment.category.CategoryModel;
 import com.example.personalfinance.fragment.dialog.ConfirmDialogFragment;
 import com.example.personalfinance.fragment.dialog.DateTimePickerDialogFragment;
-import com.example.personalfinance.fragment.transaction.BillItemFragment;
 import com.example.personalfinance.fragment.transaction.PayLaterFragment;
 import com.example.personalfinance.fragment.transaction.transaction.model.TransactModel;
 
@@ -49,7 +51,8 @@ public class NewTransactionFragment extends Fragment implements View.OnClickList
     private String header;
 
     private EditText title, amount, description;
-    private Button dateBtn, categoryBtn, itemBtn;
+    private TextView currencyTv;
+    private Button dateBtn, categoryBtn, itemBtn, payLaterBtn, createBtn;
     private ImageView imageView;
     private Spinner spinner;
 
@@ -58,7 +61,6 @@ public class NewTransactionFragment extends Fragment implements View.OnClickList
         super.onCreate(savedInstanceState);
         //init view model
         viewModel = new ViewModelProvider(NewTransactionFragment.this).get(TransactionViewModel.class);
-
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -71,33 +73,63 @@ public class NewTransactionFragment extends Fragment implements View.OnClickList
         return v;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onStart() {
         super.onStart();
-        Log.d(TAG, "onStart: new transact");
         activity.configToolbarToReturn(view -> {
-            //check for not save changes
-            if (TransactionViewModel.tempTransact.getDate_time() == null
-                    && TransactionViewModel.tempTransact.getCategoryModel() == null
-                    && (TransactionViewModel.tempTransact.getAuto_tran() == null || TransactionViewModel.tempTransact.getAuto_tran() == Period.NONE)
-                    && (TransactionViewModel.tempTransact.getItems() == null || TransactionViewModel.tempTransact.getItems().isEmpty())
-                    && title.getText().toString().isEmpty()
-                    && (amount.getText().toString().isEmpty() || amount.getText().toString().equals("0.0"))
-                    && description.getText().toString().isEmpty())
-            {
+            //return back
+            ConfirmDialogFragment dialog = ConfirmDialogFragment.newInstance("Do you really want to quit " + TransactionViewModel.action + "? \nChanges will not be saved !" );
+            dialog.setNoticeDialogListener(dialog1 -> {
                 TransactionViewModel.tempTransact = new TransactModel();
+                dialog1.dismiss();
                 getParentFragmentManager().popBackStack();
-            }
-            else{
-                ConfirmDialogFragment dialog = ConfirmDialogFragment.newInstance("There are changes not save, Do you want to quit ?");
-                dialog.setNoticeDialogListener(dialog1 -> {
-                    TransactionViewModel.tempTransact = new TransactModel();
-                    dialog1.dismiss();
-                    getParentFragmentManager().popBackStack();
-                });
-                dialog.show(getParentFragmentManager(), TAG);
-            }
+            });
+            dialog.show(getParentFragmentManager(), TAG);
         }) ;
+
+        //set up bill fragment if user choose to create bill
+        if (TransactionViewModel.tempTransact.getType() == Transact.Type.bill){
+            itemBtn.setVisibility(View.VISIBLE);
+            setTextForAmountEditText(TransactionViewModel.tempTransact.totalItemPrice());
+            amount.setEnabled(false);
+        }
+        else{
+            amount.setEnabled(true);
+            itemBtn.setVisibility(View.GONE);
+        }
+
+        //config fragment arrcording to action
+        switch (TransactionViewModel.action){
+            case update:
+                title.setText(TransactionViewModel.tempTransact.getTran_title());
+                setTextForAmountEditText(TransactionViewModel.tempTransact.getTran_amount());
+                description.setText(TransactionViewModel.tempTransact.getTran_description());
+                dateBtn.setText(printDate(TransactionViewModel.tempTransact.getDate_time()));
+                displayCategory(TransactionViewModel.tempTransact.getCategoryModel());
+                setSpinner(TransactionViewModel.tempTransact.getAuto_tran());
+                createBtn.setText("Save");
+                amount.setEnabled(false);
+                categoryBtn.setEnabled(false);
+                payLaterBtn.setEnabled(false);
+                header = (TransactionViewModel.tempTransact.getType() == Transact.Type.transaction) ? "Update transaction" : "Update bill";
+                break;
+            case insert:
+                header = (TransactionViewModel.tempTransact.getType() == Transact.Type.transaction) ? "New transaction" : "New bill";
+        }
+        //constraint amount edittext
+        MainActivity.setMaxDecimalInEditText(amount, 2);
+        //set currency for text view
+        viewModel.compositeDisposable.add(
+                viewModel
+                        .getCurrency()
+                        .subscribe(currency -> {
+                            currencyTv.setText(currency.toString());
+                            //turn off decimal if currency is vnd
+                            if (currency == Currency.vnd) amount.setInputType(InputType.TYPE_CLASS_NUMBER);
+                            else amount.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                        })
+        );
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -105,7 +137,6 @@ public class NewTransactionFragment extends Fragment implements View.OnClickList
         activity = (MainActivity)getActivity();
 
         //set header
-        header = (TransactionViewModel.tempTransact.getType() == Transact.Type.transaction) ? "New transaction" : "New bill";
         activity.setToolBarHeaderText(header);
 
         //set up component
@@ -113,8 +144,13 @@ public class NewTransactionFragment extends Fragment implements View.OnClickList
         amount = v.findViewById(R.id.transact_amount_et);
         description = v.findViewById(R.id.transact_description_et);
 
-        v.findViewById(R.id.transact_pay_later_btn).setOnClickListener(this);
-        v.findViewById(R.id.transact_create_btn).setOnClickListener(this);
+        currencyTv = v.findViewById(R.id.transact_currency);
+
+        payLaterBtn = v.findViewById(R.id.transact_pay_later_btn);
+        payLaterBtn.setOnClickListener(this);
+
+        createBtn = v.findViewById(R.id.transact_create_btn);
+        createBtn.setOnClickListener(this);
 
         categoryBtn = v.findViewById(R.id.transact_category_btn);
         categoryBtn.setOnClickListener(this);
@@ -130,23 +166,11 @@ public class NewTransactionFragment extends Fragment implements View.OnClickList
 
         spinner = v.findViewById(R.id.transact_repeat_drop_down);
         spinner.setOnItemSelectedListener(this);
-        setSpinner();
-
-        //set up bill if user choose to create bill
-        if (TransactionViewModel.tempTransact.getType() == Transact.Type.bill){
-            amount.setEnabled(false);
-            itemBtn.setVisibility(View.VISIBLE);
-            //get total item price
-            amount.setText(String.valueOf(TransactionViewModel.tempTransact.totalItemPrice()));
-        }
-        else{
-            amount.setEnabled(true);
-            itemBtn.setVisibility(View.GONE);
-        }
+        setSpinner(TransactionViewModel.tempTransact.getAuto_tran());
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public String printDate(LocalDateTime localDateTime){
+    public static String printDate(LocalDateTime localDateTime){
         if (localDateTime == null) localDateTime = LocalDateTime.now();
         int date = localDateTime.getDayOfMonth();
         int month = localDateTime.getMonthValue();
@@ -178,13 +202,12 @@ public class NewTransactionFragment extends Fragment implements View.OnClickList
         }
     }
 
-    public void setSpinner(){
-        Period period = TransactionViewModel.tempTransact.getAuto_tran();
-        if (period == null){
+    public void setSpinner(Period p){
+        if (p == null){
             spinner.setSelection(0);
             return ;
         }
-        switch (period){
+        switch (p){
             case DATE:
                 spinner.setSelection(1);
                 break;
@@ -221,13 +244,13 @@ public class NewTransactionFragment extends Fragment implements View.OnClickList
         }
         else if (id == R.id.transact_date_btn){
             //pick date for transact
-            DateTimePickerDialogFragment dialog = new DateTimePickerDialogFragment();
+            DateTimePickerDialogFragment dialog = new DateTimePickerDialogFragment(TransactionViewModel.tempTransact.getDate_time());
             dialog.setDateTimeListener(this::onConfirmDateTimeClick);
             dialog.show(getParentFragmentManager(), TAG);
         }
         else if (id == R.id.transact_create_btn){
-           //this is where to create new transact and return back to caller fragment
-            ConfirmDialogFragment dialog = ConfirmDialogFragment.newInstance("Confirm create ?");
+           //this is where to create new or udpate transact and return back to caller fragment
+            ConfirmDialogFragment dialog = ConfirmDialogFragment.newInstance("Confirm " + ((TransactionViewModel.action == TransactionViewModel.Action.insert) ? "create ? " : "update ?"));
             dialog.setNoticeDialogListener(this::onConfirmCreateClick);
             dialog.show(getParentFragmentManager(), TAG);
         }
@@ -243,7 +266,7 @@ public class NewTransactionFragment extends Fragment implements View.OnClickList
     private void onConfirmCreateClick(DialogFragment dialogFragment) {
         String tran_title = title.getText().toString().trim();
         String tran_description = description.getText().toString().trim();
-        String tran_amount = amount.getText().toString().trim();
+        String tran_amount = amount.getText().toString().trim().replace(",", "");
 
         //set date time if user not set
         if (TransactionViewModel.tempTransact.getDate_time() == null)
@@ -262,14 +285,13 @@ public class NewTransactionFragment extends Fragment implements View.OnClickList
             TransactionViewModel.tempTransact.setTran_title(tran_title);
         }
         catch (Exception e){
-            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
             /*error*/
+            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
             return;
         }
         //check amount
         try{
-            Double amount = Double.parseDouble(tran_amount);
-            if (amount < 1) throw new Exception("Amount must greater than 0, please try again");
+            double amount = Double.parseDouble(tran_amount);
             /*pass*/
             TransactionViewModel.tempTransact.setTran_amount(amount);
         }catch (NumberFormatException e){
@@ -282,13 +304,46 @@ public class NewTransactionFragment extends Fragment implements View.OnClickList
             /*error*/
             return;
         }
-        //check category
+        //check date
+        if (TransactionViewModel.tempTransact.getDate_time().isAfter(LocalDateTime.now())){
+            /*error*/
+            Toast.makeText(getContext(), "The date must be before now, please try again", Toast.LENGTH_LONG).show();
+            return;
+        }
+       //check category
         if (TransactionViewModel.tempTransact.getCategoryModel() == null){
             Toast.makeText(getContext(), "Please pick category", Toast.LENGTH_LONG).show();
             /*error*/
             return;
         }
-        insertTransact();
+        //check item size if it is bill
+        if (TransactionViewModel.tempTransact.getType() == Transact.Type.bill
+                && (TransactionViewModel.tempTransact.getItems() == null || TransactionViewModel.tempTransact.getItems().isEmpty())){
+            Toast.makeText(getContext(), "Please add item to this bill", Toast.LENGTH_LONG).show();
+            /*error*/
+            return;
+        }
+
+        viewModel.compositeDisposable.add(
+                viewModel
+                        .getCurrency()
+                        .subscribe(currency -> {
+                            if ((currency == Currency.vnd && TransactionViewModel.tempTransact.getTran_amount() == 0d)
+                                    ||(currency == Currency.usd && TransactionViewModel.tempTransact.getTran_amount() == 0.00d)){
+                                /*error*/
+                                Toast.makeText(getContext(), "Amount must greater than 0, please try again", Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                            /*pass*/
+                            switch(TransactionViewModel.action){
+                                case insert:
+                                    insertTransact();
+                                    break;
+                                case update:
+                                    updateTransact();
+                            }
+                        })
+                );
     }
 
     public void insertTransact(){
@@ -307,23 +362,33 @@ public class NewTransactionFragment extends Fragment implements View.OnClickList
                         .subscribe(() -> {
                             Toast.makeText(requireContext(), "Creating successfully", Toast.LENGTH_LONG).show();
                             /*pass*/
-                            Bundle result = new Bundle();
-                            result.putString("payload", "success");
-                            getParentFragmentManager().setFragmentResult("transct", result);
-
-                            //return back to caller fragment
+                            //reset and return back to caller fragment
                             TransactionViewModel.tempTransact = new TransactModel();
                             getParentFragmentManager().popBackStack();
                         }, throwable -> {
                             /*error*/
                             Toast.makeText(requireContext(), "Creating failed", Toast.LENGTH_SHORT).show();
-                            if (throwable.getMessage().contains("UNIQUE"))
-                                Toast.makeText(requireContext(), "This title has existed, please try again", Toast.LENGTH_SHORT).show();
-                            else{
-                                Toast.makeText(requireContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                                Log.d(TAG, "onConfirmCreateClick: " + throwable.getMessage());
-                            }
+                            Toast.makeText(requireContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "onConfirmCreateClick: " + throwable.getMessage());
                         })
+        );
+    }
+
+    public void updateTransact(){
+        viewModel.compositeDisposable.add(
+                viewModel.updateTransact(TransactionViewModel.tempTransact)
+                .subscribe(() -> {
+                    Toast.makeText(requireContext(), "Update successfully", Toast.LENGTH_LONG).show();
+                    /*pass*/
+                    //reset and return back to caller fragment
+                    TransactionViewModel.tempTransact = new TransactModel();
+                    getParentFragmentManager().popBackStack();
+                }, throwable -> {
+                    /*error*/
+                    Toast.makeText(requireContext(), "Updating failed", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "onConfirmCreateClick: " + throwable.getMessage());
+                })
         );
     }
 
@@ -333,6 +398,7 @@ public class NewTransactionFragment extends Fragment implements View.OnClickList
     }
 
     //set date
+    @SuppressLint("SetTextI18n")
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void onConfirmDateTimeClick(DialogInterface dialog, int year, int month, int date, int hourOfDay, int minute){
         dateBtn.setText("Date picked: " + date + "/" + month + "/" + year + ", " + hourOfDay + ":" + minute);
@@ -366,6 +432,16 @@ public class NewTransactionFragment extends Fragment implements View.OnClickList
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
         /*do nothing*/
+    }
+
+    private void setTextForAmountEditText(Double amount) {
+        viewModel.compositeDisposable.add(
+                viewModel
+                        .getCurrency()
+                        .subscribe(currency -> {
+                            this.amount.setText(UserRepository.formatNumber(UserRepository.toCurrency(amount, currency), false, currency));
+                        })
+        );
     }
 
     @Override

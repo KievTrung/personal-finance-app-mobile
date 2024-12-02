@@ -85,6 +85,13 @@ public class CategoryRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    public Single<Integer> countTransactHaveCategory(Integer categoryId){
+        return categoryDao
+                .countTransactHaveCategory(categoryId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     public static CategoryModel toCategoryModel(Category category){
         CategoryModel categoryModel = new CategoryModel();
         categoryModel.setName(category.getCategoryName());

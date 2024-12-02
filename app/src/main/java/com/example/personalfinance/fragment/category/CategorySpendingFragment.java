@@ -17,7 +17,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.personalfinance.R;
-import com.example.personalfinance.fragment.category.adapter.CategorySpendingRecyclerViewAdapter;
+import com.example.personalfinance.fragment.category.adapter.CategoryRecyclerViewAdapter;
 import com.example.personalfinance.fragment.category.viewmodel.SpendingCategoryViewModel;
 import com.example.personalfinance.fragment.dialog.ConfirmDialogFragment;
 
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 public class CategorySpendingFragment extends Fragment{
     private static final String TAG = "kiev ui";
     private RecyclerView recyclerView;
-    public CategorySpendingRecyclerViewAdapter adapter;
+    public CategoryRecyclerViewAdapter adapter;
     private SpendingCategoryViewModel viewModel;
 
     @Override
@@ -38,9 +38,9 @@ public class CategorySpendingFragment extends Fragment{
         viewModel = new ViewModelProvider(requireActivity()).get(SpendingCategoryViewModel.class);
 
         //init adapter
-        adapter = new CategorySpendingRecyclerViewAdapter(new ArrayList<>());
+        adapter = new CategoryRecyclerViewAdapter();
         adapter.setItemOnClickListener(position -> {
-            //todo: return the seleted item back to caller fragment
+            //return the seleted item back to caller fragment
             Bundle result = new Bundle();
             result.putSerializable("payload", viewModel.getSpendings().get(position));
             Fragment parent = getParentFragment();
@@ -48,15 +48,26 @@ public class CategorySpendingFragment extends Fragment{
             parent.getParentFragmentManager().popBackStack();
         });
         adapter.setItemOnLongClickListener(position -> {
-            CategoryDialogFragment dialog = CategoryDialogFragment
-                    .newInstance(CategoryDialogFragment.Action.update, viewModel.getSpendings().get(position));
-            dialog.setPositiveUpdate(this::onDialogPositiveUpdateClick);
-            dialog.setNeutral(this::onDialogNeutralClick);
-            dialog.show(getParentFragmentManager(), TAG);
+            //update and delete category
+            //cancel update and delete if this category has any transaction associating
+            viewModel.compositeDisposable.add(
+                    viewModel
+                            .countTransact(viewModel.getSpendings().get(position).getId())
+                            .subscribe(count -> {
+                                if (count != 0)
+                                    Toast.makeText(requireContext(), "This category has at least 1 transaction using, can not modify", Toast.LENGTH_LONG).show();
+                                else {
+                                    CategoryDialogFragment dialog = CategoryDialogFragment
+                                            .newInstance(CategoryDialogFragment.Action.update, viewModel.getSpendings().get(position));
+                                    dialog.setPositiveUpdate(this::onDialogPositiveUpdateClick);
+                                    dialog.setNeutral(this::onDialogNeutralClick);
+                                    dialog.show(getParentFragmentManager(), TAG);
+                                }
+                            })
+            );
         });
 
         //fetch from local
-        //todo: need be to dispose
         viewModel.compositeDisposable.add(
                 viewModel.fetchCategory().subscribe(categoryModels -> adapter.update(categoryModels))
         );
@@ -85,7 +96,6 @@ public class CategorySpendingFragment extends Fragment{
         ConfirmDialogFragment confirm = ConfirmDialogFragment.newInstance("Confirm updating ?");
 
         confirm.setNoticeDialogListener((confirmDialog) -> {
-            //todo: need dispose
             viewModel.compositeDisposable.add(
                     viewModel.update(categoryModel)
                             .andThen(viewModel.fetchCategory())
@@ -114,7 +124,6 @@ public class CategorySpendingFragment extends Fragment{
         ConfirmDialogFragment confirm = ConfirmDialogFragment.newInstance("Confirm delete ?");
 
         confirm.setNoticeDialogListener((confirmDialog) -> {
-            //todo: need dispose
             viewModel.compositeDisposable.add(
                     viewModel.delete(categoryModel)
                             .andThen(viewModel.fetchCategory())

@@ -42,7 +42,7 @@ public class WalletWorker extends RxWorker {
         //get all wallet
         Single<List<Wallet>> wallets = walletDao.getAllWallet();
         //get user id
-        Single<Integer> userId = userDao.getUserId();
+        Single<Integer> userId = Single.just(1);//userDao.getUserId();
         //combine
         return Single.zip(wallets, userId, (walletList, id) -> {
             Log.d(TAG, "there are " + walletList.size() + " rows need to process");

@@ -1,18 +1,15 @@
 package com.example.personalfinance.fragment.transaction.transaction.adapter;
 
+import com.example.personalfinance.datalayer.local.enums.Currency;
+import com.example.personalfinance.datalayer.local.repositories.UserRepository;
 import com.example.personalfinance.fragment.transaction.transaction.model.ItemModel;
 
-import android.os.Build;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.personalfinance.R;
@@ -25,6 +22,7 @@ public class ItemRecyclerViewAdapter extends RecyclerView.Adapter<ItemRecyclerVi
     private ItemOnClickListener itemOnClickListener;
     private ItemOnLongClickListener itemOnLongClickListener;
     private List<ItemModel> items = new ArrayList<>();
+    private Currency currency;
 
     public ItemRecyclerViewAdapter(){}
 
@@ -36,6 +34,10 @@ public class ItemRecyclerViewAdapter extends RecyclerView.Adapter<ItemRecyclerVi
         this.itemOnLongClickListener = itemOnLongClickListener;
     }
 
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
+    }
+
     @NonNull
     @Override
     public ItemRecyclerViewAdapter.ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -45,8 +47,8 @@ public class ItemRecyclerViewAdapter extends RecyclerView.Adapter<ItemRecyclerVi
 
     @Override
     public void onBindViewHolder(@NonNull ItemRecyclerViewAdapter.ItemViewHolder holder, int position) {
-        holder.price.setText(String.valueOf(items.get(position).getItem_price()));
         holder.quantity.setText(String.valueOf(items.get(position).getQuantity()));
+        holder.price.setText(UserRepository.formatNumber(UserRepository.toCurrency(items.get(position).getItem_price(), currency), true, currency));
         holder.title.setText(items.get(position).getItem_name());
         holder.itemView.setOnClickListener(v -> itemOnClickListener.onClickListener(position));
         holder.itemView.setOnLongClickListener(v -> {

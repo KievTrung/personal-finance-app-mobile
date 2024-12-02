@@ -66,6 +66,10 @@ public class EarningCategoryViewModel extends AndroidViewModel {
         }
     }
 
+    public Single<Integer> countTransact(Integer categoryId){
+        return categoryRepository.countTransactHaveCategory(categoryId);
+    }
+
     @Override
     protected void onCleared() {
         super.onCleared();

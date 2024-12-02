@@ -1,6 +1,7 @@
 package com.example.personalfinance.datalayer.local.daos;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.room.Database;
 import androidx.room.Room;
@@ -32,6 +33,7 @@ import io.reactivex.rxjava3.core.Completable;
 }, version = 1)
 @TypeConverters({LocalDateTimeConverter.class})
 public abstract class AppLocalDatabase extends RoomDatabase {
+    private static final String TAG = "kiev";
     public abstract TransactDao getTransactDao();
     public abstract WalletDao getWalletDao();
     public abstract UseWalletDao getUseWalletDao();
@@ -47,8 +49,7 @@ public abstract class AppLocalDatabase extends RoomDatabase {
         if (INSTANCE == null){
             synchronized (AppLocalDatabase.class){
                 if (INSTANCE == null){
-                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(), AppLocalDatabase.class, "local db")
-                            .build();
+                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(), AppLocalDatabase.class, "local db").build();
                 }
             }
         }

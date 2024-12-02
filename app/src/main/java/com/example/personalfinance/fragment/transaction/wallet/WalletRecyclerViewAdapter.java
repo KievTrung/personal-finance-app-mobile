@@ -10,7 +10,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.personalfinance.MainActivity;
 import com.example.personalfinance.R;
+import com.example.personalfinance.datalayer.local.enums.Currency;
+import com.example.personalfinance.datalayer.local.repositories.UserRepository;
 
 import java.util.List;
 
@@ -19,6 +22,7 @@ public class WalletRecyclerViewAdapter extends RecyclerView.Adapter<WalletRecycl
     private ItemOnClickListener itemOnClickListener;
     private ItemOnLongClickListener itemOnLongClickListener;
     private List<WalletModel> wallets;
+    private Currency currency;
 
     public WalletRecyclerViewAdapter(List<WalletModel> wallets){
         this.wallets = wallets;
@@ -32,6 +36,10 @@ public class WalletRecyclerViewAdapter extends RecyclerView.Adapter<WalletRecycl
         this.itemOnLongClickListener = itemOnLongClickListener;
     }
 
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
+    }
+
     @NonNull
     @Override
     public WalletRecyclerViewAdapter.WalletViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -42,7 +50,7 @@ public class WalletRecyclerViewAdapter extends RecyclerView.Adapter<WalletRecycl
     @Override
     public void onBindViewHolder(@NonNull WalletRecyclerViewAdapter.WalletViewHolder holder, int position) {
         holder.wallet_title.setText(wallets.get(position).getWallet_title());
-        holder.wallet_amount.setText(String.valueOf(wallets.get(position).getWallet_amount()));
+        holder.wallet_amount.setText(UserRepository.formatNumber(UserRepository.toCurrency(wallets.get(position).getWallet_amount(), currency), true, currency));
         holder.wallet_description.setText(wallets.get(position).getWallet_description());
         holder.itemView.setOnClickListener(v -> itemOnClickListener.onClickListener(position));
         holder.itemView.setOnLongClickListener(v -> {

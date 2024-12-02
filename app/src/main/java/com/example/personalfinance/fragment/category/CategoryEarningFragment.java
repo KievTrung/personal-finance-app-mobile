@@ -6,7 +6,6 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,16 +17,16 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.personalfinance.R;
-import com.example.personalfinance.fragment.category.adapter.CategoryEarningRecyclerViewAdapter;
+import com.example.personalfinance.fragment.category.adapter.CategoryRecyclerViewAdapter;
 import com.example.personalfinance.fragment.category.viewmodel.EarningCategoryViewModel;
 import com.example.personalfinance.fragment.dialog.ConfirmDialogFragment;
 
 import java.util.ArrayList;
 
 public class CategoryEarningFragment extends Fragment {
-    private static final String TAG = "kiev ui";
+    private static final String TAG = "kiev";
     private RecyclerView recyclerView;
-    public CategoryEarningRecyclerViewAdapter adapter;
+    public CategoryRecyclerViewAdapter adapter;
     private EarningCategoryViewModel viewModel;
 
     @SuppressLint("CheckResult")
@@ -40,9 +39,9 @@ public class CategoryEarningFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(EarningCategoryViewModel.class);
 
         //init recycler adapter
-        adapter = new CategoryEarningRecyclerViewAdapter(new ArrayList<>());
+        adapter = new CategoryRecyclerViewAdapter();
         adapter.setItemOnClickListener(position -> {
-            //todo: return the seleted item back to caller fragment
+            //return the seleted item back to caller fragment
             Bundle result = new Bundle();
             result.putSerializable("payload", viewModel.getEarnings().get(position));
             Fragment parent = getParentFragment();
@@ -50,11 +49,23 @@ public class CategoryEarningFragment extends Fragment {
             parent.getParentFragmentManager().popBackStack();
         });
         adapter.setItemOnLongClickListener(position -> {
-            CategoryDialogFragment dialog = CategoryDialogFragment
-                    .newInstance(CategoryDialogFragment.Action.update, viewModel.getEarnings().get(position));
-            dialog.setPositiveUpdate(this::onDialogPositiveClick);
-            dialog.setNeutral(this::onDialogNeutralClick);
-            dialog.show(getParentFragmentManager(), TAG);
+            //update and delete category
+            //cancel update and delete if this category has any transaction associating
+            viewModel.compositeDisposable.add(
+                    viewModel
+                            .countTransact(viewModel.getEarnings().get(position).getId())
+                            .subscribe(count -> {
+                                if (count != 0)
+                                    Toast.makeText(requireContext(), "This category has at least 1 transaction using, can not modify", Toast.LENGTH_LONG).show();
+                                else {
+                                    CategoryDialogFragment dialog = CategoryDialogFragment
+                                            .newInstance(CategoryDialogFragment.Action.update, viewModel.getEarnings().get(position));
+                                    dialog.setPositiveUpdate(this::onDialogPositiveClick);
+                                    dialog.setNeutral(this::onDialogNeutralClick);
+                                    dialog.show(getParentFragmentManager(), TAG);
+                                }
+                            })
+            );
         });
 
         //fetch from local

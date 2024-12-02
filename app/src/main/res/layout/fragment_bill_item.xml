@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment.transaction.BillItemFragment">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".fragment.transaction.transaction.BillItemFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -35,14 +36,31 @@
             android:text="Amount :"
             android:textSize="@dimen/textSizeTextView" />
 
-        <EditText
-            android:id="@+id/et_item_amount"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="Enter amount"
-            android:inputType="number"
-            android:textSize="@dimen/textSizeEditText" />
+            android:orientation="horizontal">
+
+            <com.aldoapps.autoformatedittext.AutoFormatEditText
+                android:id="@+id/et_item_amount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:hint="Enter amount"
+                android:inputType="numberDecimal"
+                android:textSize="@dimen/textSizeEditText"
+                app:isDecimal="true" />
+
+            <TextView
+                android:id="@+id/item_currency_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="TextView"
+                android:textSize="@dimen/textSizeTextView" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/textView14"
@@ -85,7 +103,7 @@
             android:textSize="@dimen/textSizeButton" />
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/cancel_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"

@@ -1,13 +1,20 @@
 package com.example.personalfinance.fragment.transaction.transaction;
 
 import android.app.Application;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.lifecycle.AndroidViewModel;
 
 import com.example.personalfinance.datalayer.local.daos.AppLocalDatabase;
+import com.example.personalfinance.datalayer.local.entities.User;
+import com.example.personalfinance.datalayer.local.enums.Currency;
 import com.example.personalfinance.datalayer.local.repositories.TransactRepository;
+import com.example.personalfinance.datalayer.local.repositories.UserRepository;
+import com.example.personalfinance.fragment.transaction.transaction.model.Filter;
+import com.example.personalfinance.fragment.transaction.transaction.model.ItemModel;
 import com.example.personalfinance.fragment.transaction.transaction.model.TransactModel;
 
 import java.util.ArrayList;
@@ -20,14 +27,22 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 public class TransactionViewModel extends AndroidViewModel {
     private static final String TAG = "kiev";
     private TransactRepository transactRepository;
+    private UserRepository userRepository;
     private List<TransactModel> transacts;
+
+    public enum Action{ update, insert }
+    public static TransactModel tempTransact = new TransactModel();
+    public static Action action;
+    public static boolean requestAddCategoryToFilter = false;
+    public Filter filter;
     public CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-    public static TransactModel tempTransact = new TransactModel();
-
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public TransactionViewModel(@NonNull Application application) {
         super(application);
         transactRepository = new TransactRepository(application.getApplicationContext());
+        userRepository = new UserRepository(application.getApplicationContext());
+        filter = new Filter();
         transacts = new ArrayList<>();
     }
 
@@ -44,11 +59,28 @@ public class TransactionViewModel extends AndroidViewModel {
         }
     }
 
-    public Single<List<TransactModel>> getAll(Integer wallet_id){
-        return transactRepository.getAllByWalletId(wallet_id).doOnSuccess(transactModels -> transacts = transactModels);
+    public Single<List<ItemModel>> getAllItem(Integer billId){
+        return transactRepository.getAllItemBelongTo(billId);
     }
 
-    //need to check amount when inserting new transact of spending category
+    public Completable updateTransact(TransactModel transactModel){
+        try {
+            return transactRepository.updateTransact(transactModel);
+        } catch (Exception e) {
+            Log.d(TAG, "update transact: " + e.getMessage());
+            return Completable.error(e);
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public Single<List<TransactModel>> fetchAll(Integer wallet_id, Filter filter){
+        return transactRepository.getAllByWalletId(wallet_id, filter).doOnSuccess(transactModels -> transacts = transactModels);
+    }
+
+    public Single<TransactModel> get(Integer id){
+        return transactRepository.getTransact(id);
+    }
+
     public Single<Double> getWalletAmount(Integer wallet_id){
         return transactRepository.getWalletAmount(wallet_id);
     }
@@ -60,6 +92,10 @@ public class TransactionViewModel extends AndroidViewModel {
             Log.d(TAG, "deleteTransact: " + e.getMessage());
             return Completable.error(e);
         }
+    }
+
+    public Single<Currency> getCurrency(){
+        return userRepository.getCurrency();
     }
 
     @Override

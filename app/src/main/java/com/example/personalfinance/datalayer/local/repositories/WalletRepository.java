@@ -11,8 +11,10 @@ import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
+import com.example.personalfinance.datalayer.local.daos.UserDao;
 import com.example.personalfinance.datalayer.local.daos.auxiliry.DeletedRowDao;
 import com.example.personalfinance.datalayer.local.entities.auxiliry.DeletedRow;
+import com.example.personalfinance.datalayer.local.enums.Currency;
 import com.example.personalfinance.datalayer.workers.SyncStateManager;
 import com.example.personalfinance.datalayer.local.daos.AppLocalDatabase;
 import com.example.personalfinance.datalayer.local.daos.UseWalletDao;
@@ -40,16 +42,15 @@ public class WalletRepository {
     private static final String TAG = "kiev";
     private final WalletDao walletDao;
     private final UseWalletDao useWalletDao;
-    private final WalletService walletService;
+    private final UserDao userDao;
     private final DeletedRowDao deletedRowDao;
-    private static long PERIODIC_INTERVAL = 15l;
-    private static long PERIODIC_FLEX = 14l;
 
     public WalletRepository(Context context){
-        walletDao = AppLocalDatabase.getInstance(context).getWalletDao();
-        useWalletDao = AppLocalDatabase.getInstance(context).getUseWalletDao();
-        deletedRowDao = AppLocalDatabase.getInstance(context).getDeletedRowDao();
-        walletService = ApiServiceFactory.getWalletService();
+        AppLocalDatabase app = AppLocalDatabase.getInstance(context);
+        walletDao = app.getWalletDao();
+        useWalletDao = app.getUseWalletDao();
+        deletedRowDao = app.getDeletedRowDao();
+        userDao = app.getUserDao();
     }
 
     public static void startWork(Context context){
@@ -59,10 +60,12 @@ public class WalletRepository {
                 .setRequiresBatteryNotLow(true)
                 .build();
         //create periodic work request
+        long PERIODIC_FLEX = 14l;
+        long PERIODIC_INTERVAL = 15l;
         PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest
                 .Builder(WalletWorker.class,
-                    PERIODIC_INTERVAL, TimeUnit.MINUTES,
-                    PERIODIC_FLEX, TimeUnit.MINUTES)
+                PERIODIC_INTERVAL, TimeUnit.MINUTES,
+                PERIODIC_FLEX, TimeUnit.MINUTES)
                 .setConstraints(constraints)
                 .setBackoffCriteria(BackoffPolicy.LINEAR, PeriodicWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
                 .addTag(WorkTag.persistent.toString())
@@ -87,6 +90,9 @@ public class WalletRepository {
 
     public Completable insert(WalletModel walletModel) throws Exception {
         return AppLocalDatabase.executeTransaction(() -> {
+            walletModel.setWallet_amount(UserRepository.backCurrency(walletModel.getWallet_amount(), userDao.getCurrency()));
+            Log.d(TAG, "insert: " + walletModel.getWallet_amount());
+            Log.d(TAG, "insert: " + UserRepository.toCurrency(walletModel.getWallet_amount(), Currency.vnd));
             long id = walletDao.insertWallet(toWallet(walletModel, SyncStateManager.Action.insert, null));
             useWalletDao.deleteUseWallet();
             useWalletDao.insertUseWallet(new UseWallet((int)id));
@@ -98,6 +104,7 @@ public class WalletRepository {
     public Completable update(WalletModel walletModel) throws Exception {
         return AppLocalDatabase.executeTransaction(() -> {
                     SyncState state = walletDao.getState(walletModel.getId());
+                    walletModel.setWallet_amount(UserRepository.backCurrency(walletModel.getWallet_amount(), userDao.getCurrency()));
                     walletDao.updateWallet(toWallet(walletModel, SyncStateManager.Action.update, state));
                 })
                 .subscribeOn(Schedulers.io())
@@ -148,6 +155,7 @@ public class WalletRepository {
             long id = useWalletDao.getUseWallet();
             if (id == walletModel.getId())
                 useWalletDao.deleteUseWallet();
+
             SyncState state = walletDao.getState(walletModel.getId());
             if (state == SyncState.synced)
                 deletedRowDao.insert(new DeletedRow(walletModel.getId(), DeletedRow.Table.wallet));

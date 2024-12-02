@@ -41,15 +41,25 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
-            <EditText
+            <com.aldoapps.autoformatedittext.AutoFormatEditText
                 android:id="@+id/transact_amount_et"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="3"
+                android:layout_weight="1"
                 android:ems="10"
                 android:hint="Enter amount"
-                android:inputType="number"
-                android:textSize="@dimen/textSizeEditText" />
+                android:inputType="numberDecimal"
+                android:textSize="@dimen/textSizeEditText"
+                app:isDecimal="true" />
+
+            <TextView
+                android:id="@+id/transact_currency"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="TextView"
+                android:textSize="@dimen/textSizeTextView" />
 
         </LinearLayout>
 
@@ -173,13 +183,15 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:layout_margin="10dp"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/transact_create_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="Create"
             android:textSize="@dimen/textSizeButton" />
+
     </LinearLayout>
 </FrameLayout>

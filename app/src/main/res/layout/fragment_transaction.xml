@@ -8,12 +8,6 @@
     android:orientation="vertical"
     tools:context=".fragment.transaction.transaction.TransactionFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/chart_fragment_view"
-        android:layout_width="match_parent"
-        android:layout_height="250dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -28,7 +22,8 @@
             android:backgroundTint="@color/white"
             android:elevation="5dp"
             android:text="0000 VND"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            tools:ignore="TouchTargetSizeCheck" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -42,7 +37,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:backgroundTint="@color/white"
-                android:drawableStart="@drawable/add"
+                android:drawableTop="@drawable/add"
                 android:elevation="10dp"
                 android:text="New"
                 android:textSize="@dimen/textSizeButton" />
@@ -53,74 +48,71 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:backgroundTint="@color/white"
-                android:drawableStart="@drawable/bar_chart"
+                android:drawableTop="@drawable/line_chart"
                 android:elevation="10dp"
-                android:text="Bar"
+                android:text="line"
                 android:textSize="@dimen/textSizeButton"
                 android:visibility="visible" />
 
             <Button
                 android:id="@+id/view_btn"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:backgroundTint="@color/white"
-                android:drawableLeft="@drawable/view"
+                android:drawableTop="@drawable/view"
                 android:text="View"
                 android:textSize="@dimen/textSizeButton" />
 
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="horizontal">
-
             <Button
-                android:id="@+id/transaction_begin_date_btn"
+                android:id="@+id/filter_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:backgroundTint="@color/white"
-                android:elevation="10dp"
-                android:text="Begin"
-                android:textSize="@dimen/textSizeButton" />
+                android:drawableTop="@drawable/filter_list"
+                android:text="filter"
+                android:textSize="@dimen/textSizeButton"
+                tools:ignore="SpeakableTextPresentCheck" />
 
-            <Button
-                android:id="@+id/transaction_end_date_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:backgroundTint="@color/white"
-                android:elevation="10dp"
-                android:text="End"
-                android:textSize="@dimen/textSizeButton" />
         </LinearLayout>
+
     </LinearLayout>
 
-    <FrameLayout
-        android:id="@+id/transaction_list"
+    <TextView
+        android:id="@+id/title_tv"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="TextView"
+        android:textSize="@dimen/textSizeTextViewSmall" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view_transaction"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/chart_fragment_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
 
-        </androidx.recyclerview.widget.RecyclerView>
+        <FrameLayout
+            android:id="@+id/transaction_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end|bottom"
-            android:layout_margin="16dp"
-            android:src="@drawable/filter_list"
-            app:backgroundTint="#D2CCCC"
-            tools:ignore="SpeakableTextPresentCheck" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view_transaction"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="8dp">
 
-    </FrameLayout>
+            </androidx.recyclerview.widget.RecyclerView>
+
+        </FrameLayout>
+    </LinearLayout>
 
 </LinearLayout>

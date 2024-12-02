@@ -12,36 +12,43 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.personalfinance.R;
 import com.example.personalfinance.fragment.category.CategoryModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class CategorySpendingRecyclerViewAdapter extends RecyclerView.Adapter<CategorySpendingRecyclerViewAdapter.SpendingViewHolder> {
-    private CategorySpendingRecyclerViewAdapter.ItemOnClickListener itemOnClickListener;
-    private CategorySpendingRecyclerViewAdapter.ItemOnLongClickListener itemOnLongClickListener;
+public class CategoryRecyclerViewAdapter extends RecyclerView.Adapter<CategoryRecyclerViewAdapter.SpendingViewHolder> {
+    private CategoryRecyclerViewAdapter.ItemOnClickListener itemOnClickListener;
+    private CategoryRecyclerViewAdapter.ItemOnLongClickListener itemOnLongClickListener;
     private List<CategoryModel> categories;
 
-    public CategorySpendingRecyclerViewAdapter(List<CategoryModel> categories) {
-        this.categories = categories;
+    public CategoryRecyclerViewAdapter() {
+        this.categories = new ArrayList<>();
     }
 
-    public void setItemOnClickListener(CategorySpendingRecyclerViewAdapter.ItemOnClickListener itemOnClickListener) {
+    public void setItemOnClickListener(CategoryRecyclerViewAdapter.ItemOnClickListener itemOnClickListener) {
         this.itemOnClickListener = itemOnClickListener;
     }
 
-    public void setItemOnLongClickListener(CategorySpendingRecyclerViewAdapter.ItemOnLongClickListener itemOnLongClickListener) {
+    public void setItemOnLongClickListener(CategoryRecyclerViewAdapter.ItemOnLongClickListener itemOnLongClickListener) {
         this.itemOnLongClickListener = itemOnLongClickListener;
     }
 
     @NonNull
     @Override
-    public CategorySpendingRecyclerViewAdapter.SpendingViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_views_row_category_spending, parent, false);
-        return new CategorySpendingRecyclerViewAdapter.SpendingViewHolder(view);
+    public CategoryRecyclerViewAdapter.SpendingViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_views_row_category, parent, false);
+        return new CategoryRecyclerViewAdapter.SpendingViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull SpendingViewHolder holder, int position) {
         holder.item_name.setText(categories.get(position).getName());
-        holder.imageView.setImageResource(R.drawable.money_spend);
+        switch (categories.get(position).getCategoryType()){
+            case spending:
+                holder.imageView.setImageResource(R.drawable.money_spend);
+                break;
+            case earning:
+                holder.imageView.setImageResource(R.drawable.money_earn);
+        }
         holder.itemView.setOnClickListener(v -> itemOnClickListener.onClickListener(position));
         holder.itemView.setOnLongClickListener(v -> {
             itemOnLongClickListener.onLongClickListener(position);
@@ -60,8 +67,8 @@ public class CategorySpendingRecyclerViewAdapter extends RecyclerView.Adapter<Ca
 
         public SpendingViewHolder(@NonNull View itemView) {
             super(itemView);
-            item_name = itemView.findViewById(R.id.spending_name);
-            imageView = itemView.findViewById(R.id.spending_image);
+            item_name = itemView.findViewById(R.id.name);
+            imageView = itemView.findViewById(R.id.image);
         }
     }
 

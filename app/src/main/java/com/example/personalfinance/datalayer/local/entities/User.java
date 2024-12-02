@@ -6,6 +6,7 @@ import androidx.room.PrimaryKey;
 
 import com.example.personalfinance.datalayer.local.enums.Currency;
 import com.example.personalfinance.datalayer.local.enums.Language;
+import com.example.personalfinance.datalayer.local.enums.SyncState;
 
 @Entity
 public class User {
@@ -16,6 +17,7 @@ public class User {
     private String email;
     private Currency currency;
     private Language language;
+    private SyncState syncState;
 
     public User(){}
 
@@ -41,6 +43,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public SyncState getSyncState() {
+        return syncState;
+    }
+
+    public void setSyncState(SyncState syncState) {
+        this.syncState = syncState;
     }
 
     public String getEmail() {
@@ -76,6 +86,7 @@ public class User {
                 ", email='" + email + '\'' +
                 ", currency=" + currency +
                 ", language=" + language +
+                ", syncState=" + syncState +
                 '}';
     }
 }

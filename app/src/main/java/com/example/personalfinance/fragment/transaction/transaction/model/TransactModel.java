@@ -1,15 +1,23 @@
 package com.example.personalfinance.fragment.transaction.transaction.model;
 
+import android.os.Build;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
 import com.example.personalfinance.datalayer.local.entities.Transact;
 import com.example.personalfinance.datalayer.local.enums.Period;
 import com.example.personalfinance.fragment.category.CategoryModel;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class TransactModel {
+public class TransactModel implements Parcelable {
     private Integer tran_id;
     private Integer wallet_id;
     private String tran_title;
@@ -22,6 +30,14 @@ public class TransactModel {
     private String tran_description;
 
     public TransactModel(){
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    protected TransactModel(Parcel in){
+        tran_id = in.readInt();
+        wallet_id = in.readInt();
+        tran_amount = in.readDouble();
+        date_time = LocalDateTime.parse(in.readString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     }
 
     public String getTran_description() {
@@ -40,23 +56,36 @@ public class TransactModel {
             Log.d("kiev", "remove error: " + position);
     }
 
+    public void replaceItem(int position, ItemModel item){
+        if (items != null){
+            ItemModel oldItem = items.get(position);
+            item.setId(oldItem.getId());
+            item.setBill_id(oldItem.getBill_id());
+            items.set(position, item);
+        }
+    }
+
     public void addItem(ItemModel item){
         if (items != null){
             items.add(item);
         }
     }
 
-    public Double totalItemPrice(){
+    public double totalItemPrice(){
         if (items == null) return 0d;
-        Double sum = 0d;
+        double sum = 0d;
         for(ItemModel item : items)
-            sum += item.getItem_price() * item.getQuantity();
+            sum += (item.getItem_price() * item.getQuantity());
         return sum;
     }
 
-    public boolean isDuplicateTitle(String title){
-        for(ItemModel item : items)
-            if (title.equals(item.getItem_name())) return true;
+    public boolean isDuplicateTitle(String title, Integer position){
+        for(int i=0; i<items.size(); i++){
+            if (position != null && position == i)
+                continue;
+            if (title.equals(items.get(i).getItem_name()))
+                return true;
+        }
         return false;
     }
 
@@ -145,5 +174,32 @@ public class TransactModel {
                 ", auto_tran=" + auto_tran +
                 ", tran_description='" + tran_description + '\'' +
                 '}';
+    }
+
+    public static final Creator<TransactModel> CREATOR = new Creator<TransactModel>() {
+        @RequiresApi(api = Build.VERSION_CODES.O)
+        @Override
+        public TransactModel createFromParcel(Parcel source) {
+            return new TransactModel(source);
+        }
+
+        @Override
+        public TransactModel[] newArray(int size) {
+            return new TransactModel[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeInt(tran_id);
+        dest.writeInt(wallet_id);
+        dest.writeDouble(tran_amount);
+        dest.writeString(date_time.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
     }
 }

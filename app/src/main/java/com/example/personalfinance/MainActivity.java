@@ -3,11 +3,16 @@ package com.example.personalfinance;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.Spanned;
+import android.text.TextWatcher;
 import android.transition.TransitionInflater;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -23,11 +28,11 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.personalfinance.fragment.AccountFragment;
+import com.example.personalfinance.datalayer.local.enums.Currency;
+import com.example.personalfinance.fragment.account.AccountFragment;
 import com.example.personalfinance.fragment.BudgetFragment;
 import com.example.personalfinance.fragment.LoanDebtFragment;
 import com.example.personalfinance.fragment.NotificationFragment;
@@ -35,6 +40,8 @@ import com.example.personalfinance.fragment.SettingFragment;
 import com.example.personalfinance.fragment.transaction.transaction.TransactionFragment;
 import com.example.personalfinance.fragment.transaction.wallet.WalletFragment;
 import com.google.android.material.navigation.NavigationView;
+
+import java.text.DecimalFormat;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = "kiev main";
@@ -78,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         setSupportActionBar(tb);
 
-        ((ImageButton)findViewById(R.id.toolbar_menu)).setOnClickListener((v)-> dl.openDrawer(Gravity.LEFT));
+        findViewById(R.id.toolbar_menu).setOnClickListener((v)-> dl.openDrawer(Gravity.LEFT));
 
         nv.bringToFront();
         nv.setNavigationItemSelectedListener(this);
@@ -93,7 +100,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        initOpenFragment();
+//        initOpenFragment();
+        replaceFragment(new AccountFragment(), false, null);
+        currentFragment = FRAGMENT.FRAGMENT_ACCOUNT;
     }
 
     public void replaceFragment(Fragment fragment, boolean addBackStack, Bundle args){
@@ -116,18 +125,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void configToolBarTopRightBtn(int viewMode, int imageSrc, View.OnClickListener setAction){
-        ImageButton backBtn = getTopRightBtnReference(this);
+        ImageButton backBtn = getTopRightBtnReference();
         backBtn.setImageResource(imageSrc);
         backBtn.setOnClickListener(setAction);
         backBtn.setVisibility(viewMode);
     }
 
-    public ImageButton getTopRightBtnReference(Activity activity){
-        return activity.findViewById(R.id.toolbar_back);
+    public ImageButton getTopRightBtnReference(){
+        return this.findViewById(R.id.toolbar_back);
     }
 
     public void setToolBarReturnBtnVisibility(int viewMode){
-        ImageButton returnBtn = this.findViewById(R.id.toolbar_back);
+        ImageButton returnBtn = getTopRightBtnReference();
         returnBtn.setVisibility(viewMode);
     }
 
@@ -147,6 +156,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 viewModel
                         .getUseWallet()
                         .subscribe(walletModel -> {
+                            Log.d(TAG, "initOpenFragment: " + walletModel.getId());
                             if (walletModel.getId() == -1)
                                 replaceFragment(new WalletFragment(), false, null);
                             else
@@ -187,6 +197,42 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public static void setMaxDecimalInEditText(EditText editText, int maxDecimalPlaces) {
+        // Add a TextWatcher to enforce the decimal limit dynamically
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String text = s.toString();
+                if (text.contains(".")) {
+                    // Limit decimal places
+                    String[] parts = text.split("\\.");
+                    if (parts.length > 1 && parts[1].length() > maxDecimalPlaces) {
+                        s.replace(0, s.length(), parts[0] + "." + parts[1].substring(0, maxDecimalPlaces));
+                    }
+                }
+            }
+        });
+
+        // Add an InputFilter to restrict invalid inputs
+        InputFilter filter = (source, start, end, dest, dstart, dend) -> {
+            if (source.toString().matches("[^0-9.]")) {
+                return ""; // Block non-numeric input
+            }
+            if (source.toString().equals(".") && dest.toString().contains(".")) {
+                return ""; // Block multiple dots
+            }
+            return null; // Accept valid input
+        };
+
+        editText.setFilters(new InputFilter[]{filter});
     }
 
 }

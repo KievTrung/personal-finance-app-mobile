@@ -34,11 +34,10 @@
             android:layout_toStartOf="@id/toolbar_back"
             android:layout_toEndOf="@id/toolbar_menu"
             android:layout_weight="20"
-            android:text="bitch"
             android:textAlignment="center"
             android:textColor="@android:color/black"
             android:textSize="@dimen/textSizeTextViewHeader"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
         <ImageButton
             android:id="@+id/toolbar_back"
@@ -50,6 +49,7 @@
             android:background="@drawable/ripple_effect"
             android:padding="2dp"
             android:src="@drawable/wallet"
+            android:visibility="visible"
             tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
     </LinearLayout>
 

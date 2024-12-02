@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <EditText
+        android:id="@+id/filter_title_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Search for title"
+        android:inputType="text"
+        android:textSize="@dimen/textSizeEditText" />
+
+    <TextView
+        android:id="@+id/textView22"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Transaction type :"
+        android:textSize="@dimen/textSizeTextView" />
+
+    <Spinner
+        android:id="@+id/filter_type_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        tools:ignore="TouchTargetSizeCheck"
+        android:entries="@array/tran_type"/>
+
+    <TextView
+        android:id="@+id/textView24"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Sorting :"
+        android:textSize="@dimen/textSizeTextView" />
+
+    <Spinner
+        android:id="@+id/filter_sort_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        tools:ignore="TouchTargetSizeCheck"
+        android:entries="@array/sort"/>
+
+    <LinearLayout
+        android:id="@+id/filter_date_custome"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="From :"
+            android:textSize="@dimen/textSizeTextView" />
+
+        <Button
+            android:id="@+id/filter_begin_date_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="from"
+            android:textSize="@dimen/textSizeButton" />
+
+        <TextView
+            android:id="@+id/textView15"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="To :"
+            android:textSize="@dimen/textSizeTextView" />
+
+        <Button
+            android:id="@+id/filter_end_date_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="to"
+            android:textSize="@dimen/textSizeButton" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/filter_category_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="pick category"
+        android:textSize="@dimen/textSizeButton" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_filter"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginTop="10dp" />
+
+</LinearLayout>

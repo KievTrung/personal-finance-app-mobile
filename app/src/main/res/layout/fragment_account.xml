@@ -5,14 +5,26 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".fragment.AccountFragment">
+    tools:context=".fragment.account.AccountFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
+
+    <Button
+        android:id="@+id/create_account_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:text="account fragment"
-        android:textSize="34dp" />
+        android:text="set user" />
+
+    <Button
+        android:id="@+id/switch_currency"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="switch currency usd" />
+
+    <Button
+        android:id="@+id/switch_currency_vnd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="switch current vnd" />
 
 </LinearLayout>
