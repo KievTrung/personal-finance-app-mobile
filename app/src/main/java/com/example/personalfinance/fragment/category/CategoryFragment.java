@@ -18,20 +18,14 @@ import android.widget.Toast;
 import com.example.personalfinance.MainActivity;
 import com.example.personalfinance.R;
 import com.example.personalfinance.datalayer.local.enums.CategoryType;
+import com.example.personalfinance.error.MessageCode;
 import com.example.personalfinance.fragment.category.adapter.CategoryViewPagerAdapter;
+import com.example.personalfinance.fragment.category.model.CategoryModel;
 import com.example.personalfinance.fragment.category.viewmodel.EarningCategoryViewModel;
 import com.example.personalfinance.fragment.category.viewmodel.SpendingCategoryViewModel;
 import com.example.personalfinance.fragment.dialog.ConfirmDialogFragment;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
-
-import java.util.List;
-
-import io.reactivex.rxjava3.annotations.NonNull;
-import io.reactivex.rxjava3.core.CompletableObserver;
-import io.reactivex.rxjava3.core.SingleObserver;
-import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.disposables.Disposable;
 
 public class CategoryFragment extends Fragment implements View.OnClickListener{
     private static final String TAG = "kiev ui";
@@ -59,7 +53,6 @@ public class CategoryFragment extends Fragment implements View.OnClickListener{
 
         //get host activity
         activity = (MainActivity) getActivity();
-
     }
 
     @Override
@@ -87,20 +80,17 @@ public class CategoryFragment extends Fragment implements View.OnClickListener{
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> tab.setText((position == 0) ? "spending" : "earning")).attach();
 
         v.findViewById(R.id.new_category_btn).setOnClickListener(this);
-
-        Log.d(TAG, "init: category fragment");
     }
 
     @Override
     public void onClick(View view) {
-        CategoryDialogFragment dialog = CategoryDialogFragment.newInstance(CategoryDialogFragment.Action.insert, null);
+        CategoryDialogFragment dialog = new CategoryDialogFragment(CategoryDialogFragment.Action.insert, null);
         dialog.setPositive(this::onDialogPositiveClick);
         dialog.show(getParentFragmentManager(), TAG);
     }
 
     @SuppressLint("CheckResult")
     public void onDialogPositiveClick(DialogFragment dialog, CategoryModel categoryModel) {
-        Log.d(TAG, "onDialogPositiveClick: " + categoryModel);
         //add new category
         ConfirmDialogFragment confirm = ConfirmDialogFragment.newInstance("Confirm adding ?");
 
@@ -113,14 +103,14 @@ public class CategoryFragment extends Fragment implements View.OnClickListener{
                                 .insert(categoryModel)
                                 .andThen(spendingViewModel.fetchCategory())
                                 .subscribe(categoryModels -> {
-                                            Toast.makeText(requireContext(), "Adding successfully", Toast.LENGTH_LONG).show();
+                                            Toast.makeText(requireContext(), MessageCode.success_creation, Toast.LENGTH_LONG).show();
                                             spendingFragment.adapter.update(categoryModels);
                                         }
                                         , throwable -> {
                                             Log.d(TAG, "onError, insertTransact category: " + throwable.getMessage());
-                                            Toast.makeText(requireContext(), "Adding failed", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(requireContext(), MessageCode.fail_creation, Toast.LENGTH_SHORT).show();
                                             if (throwable.getMessage().contains("UNIQUE"))
-                                                Toast.makeText(requireContext(), "This category has existed, please try again", Toast.LENGTH_LONG).show();
+                                                Toast.makeText(requireContext(), MessageCode.category_duplicated, Toast.LENGTH_LONG).show();
                                             else
                                                 Toast.makeText(requireContext(), throwable.getMessage(), Toast.LENGTH_LONG).show();
                                         })
@@ -134,14 +124,14 @@ public class CategoryFragment extends Fragment implements View.OnClickListener{
                                 .insert(categoryModel)
                                 .andThen(earningViewModel.fetchCategory())
                                 .subscribe(categoryModels -> {
-                                            Toast.makeText(requireContext(), "Adding successfully", Toast.LENGTH_LONG).show();
+                                            Toast.makeText(requireContext(), MessageCode.success_creation, Toast.LENGTH_LONG).show();
                                             earningFragment.adapter.update(categoryModels);
                                         }
                                         , throwable -> {
                                             Log.d(TAG, "onError, insertTransact category: " + throwable.getMessage());
-                                            Toast.makeText(requireContext(), "Adding failed", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(requireContext(), MessageCode.fail_creation, Toast.LENGTH_SHORT).show();
                                             if (throwable.getMessage().contains("UNIQUE"))
-                                                Toast.makeText(requireContext(), "This category has existed, please try again", Toast.LENGTH_LONG).show();
+                                                Toast.makeText(requireContext(), MessageCode.category_duplicated, Toast.LENGTH_LONG).show();
                                             else
                                                 Toast.makeText(requireContext(), throwable.getMessage(), Toast.LENGTH_LONG).show();
                                         })

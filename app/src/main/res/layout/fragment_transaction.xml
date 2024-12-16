@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".fragment.transaction.transaction.TransactionFragment">
+    tools:context=".fragment.transaction.TransactionFragment">
 
 
     <LinearLayout
@@ -111,6 +111,16 @@
                 android:layout_marginTop="8dp">
 
             </androidx.recyclerview.widget.RecyclerView>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab_print"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="10dp"
+                android:clickable="true"
+                android:src="@drawable/print"
+                app:backgroundTint="#21E0CE" />
 
         </FrameLayout>
     </LinearLayout>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <EditText
+        android:id="@+id/budget_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Enter title"
+        android:inputType="text"
+        android:textSize="@dimen/textSizeEditText" />
+
+    <LinearLayout
+        android:id="@+id/linearlayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <LinearLayout
+            android:id="@+id/setAmount2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:orientation="horizontal">
+
+            <com.aldoapps.autoformatedittext.AutoFormatEditText
+                android:id="@+id/budget_amount_et"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:hint="Enter amount"
+                android:inputType="numberDecimal"
+                android:textSize="@dimen/textSizeEditText"
+                app:isDecimal="true" />
+
+            <TextView
+                android:id="@+id/budget_currency"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="TextView"
+                android:textSize="@dimen/textSizeTextView" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textView25"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:text="Category type :"
+            android:textSize="@dimen/textSizeTextView" />
+
+        <Spinner
+            android:id="@+id/budget_category_type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:entries="@array/category" />
+
+        <TextView
+            android:id="@+id/textView26"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="From :"
+            android:textSize="@dimen/textSizeTextView" />
+
+        <Button
+            android:id="@+id/budget_begin_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="From"
+            android:textSize="@dimen/textSizeButton" />
+
+        <TextView
+            android:id="@+id/textView27"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="To :"
+            android:textSize="@dimen/textSizeTextView" />
+
+        <Button
+            android:id="@+id/budget_end_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:text="To"
+            android:textSize="@dimen/textSizeButton" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/budget_category"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="pick category"
+        android:textSize="@dimen/textSizeButton" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_add_budget"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</LinearLayout>

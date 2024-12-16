@@ -7,11 +7,12 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 
 import com.example.personalfinance.datalayer.local.enums.CategoryType;
-import com.example.personalfinance.datalayer.local.repositories.CategoryRepository;
-import com.example.personalfinance.fragment.category.CategoryModel;
+import com.example.personalfinance.fragment.category.repository.CategoryRepository;
+import com.example.personalfinance.fragment.category.model.CategoryModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
@@ -27,6 +28,13 @@ public class EarningCategoryViewModel extends AndroidViewModel {
         super(application);
         categoryRepository = new CategoryRepository(application.getApplicationContext());
         earnings = new ArrayList<>();
+    }
+
+    public void setTitle(Integer id, String title){
+        earnings.forEach(categoryModel -> {
+            if(Objects.equals(categoryModel.getId(), id))
+                categoryModel.setName(title);
+        });
     }
 
     public List<CategoryModel> getEarnings(){return earnings;}
@@ -66,8 +74,8 @@ public class EarningCategoryViewModel extends AndroidViewModel {
         }
     }
 
-    public Single<Integer> countTransact(Integer categoryId){
-        return categoryRepository.countTransactHaveCategory(categoryId);
+    public Single<Integer> countTransactAndBudget(Integer categoryId){
+        return categoryRepository.countTransactAndBudgetHaveCategory(categoryId);
     }
 
     @Override

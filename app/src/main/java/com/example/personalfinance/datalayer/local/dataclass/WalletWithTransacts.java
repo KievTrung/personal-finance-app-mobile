@@ -3,8 +3,8 @@ package com.example.personalfinance.datalayer.local.dataclass;
 import androidx.room.Embedded;
 import androidx.room.Relation;
 
-import com.example.personalfinance.datalayer.local.entities.Transact;
-import com.example.personalfinance.datalayer.local.entities.Wallet;
+import com.example.personalfinance.datalayer.local.entity.Transact;
+import com.example.personalfinance.datalayer.local.entity.Wallet;
 
 import java.util.List;
 

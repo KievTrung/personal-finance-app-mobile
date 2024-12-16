@@ -15,6 +15,26 @@
         android:inputType="text"
         android:textSize="@dimen/textSizeEditText" />
 
+    <LinearLayout
+        android:id="@+id/linearlayour3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:text="Wallet :"
+            android:textSize="@dimen/textSizeTextView" />
+
+        <Spinner
+            android:id="@+id/filter_wallet_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
     <TextView
         android:id="@+id/textView22"
         android:layout_width="match_parent"
@@ -98,7 +118,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_filter"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="match_parent"
         android:layout_marginTop="10dp" />
 
 </LinearLayout>

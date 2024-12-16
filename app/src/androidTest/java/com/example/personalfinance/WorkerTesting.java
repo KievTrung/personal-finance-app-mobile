@@ -19,10 +19,10 @@ import androidx.work.testing.WorkManagerTestInitHelper;
 import com.example.personalfinance.datalayer.local.daos.AppLocalDatabase;
 import com.example.personalfinance.datalayer.local.daos.UserDao;
 import com.example.personalfinance.datalayer.local.daos.WalletDao;
-import com.example.personalfinance.datalayer.local.entities.User;
+import com.example.personalfinance.datalayer.local.entity.User;
 import com.example.personalfinance.datalayer.local.enums.Currency;
 import com.example.personalfinance.datalayer.local.enums.Language;
-import com.example.personalfinance.datalayer.local.repositories.WalletRepository;
+import com.example.personalfinance.fragment.wallet.repository.WalletRepository;
 import com.example.personalfinance.datalayer.workers.WalletWorker;
 import com.example.personalfinance.datalayer.workers.WorkTag;
 

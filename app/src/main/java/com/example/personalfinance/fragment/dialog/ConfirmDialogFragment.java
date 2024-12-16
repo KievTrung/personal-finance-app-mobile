@@ -14,10 +14,19 @@ public class ConfirmDialogFragment extends DialogFragment {
         void onDialogPositiveClick(DialogFragment dialog);
     }
 
+    public interface NoticeCancelDialogListener{
+        void onDialogNegativeClick(DialogFragment dialog);
+    }
+
     NoticeDialogListener listener;
+    NoticeCancelDialogListener cancelListener = null;
 
     public void setNoticeDialogListener(NoticeDialogListener noticeDialogListener){
         this.listener = noticeDialogListener;
+    }
+
+    public void setCancelListener(NoticeCancelDialogListener cancelListener) {
+        this.cancelListener = cancelListener;
     }
 
     public static ConfirmDialogFragment newInstance(String header){
@@ -35,7 +44,12 @@ public class ConfirmDialogFragment extends DialogFragment {
 
         builder.setTitle(getArguments().getString("header"))
                 .setPositiveButton("Confirm", (dialog, id) -> listener.onDialogPositiveClick(this))
-                .setNegativeButton("Cancel", (dialog, id) -> dismiss());
+                .setNegativeButton("Cancel", (dialog, id) -> {
+                    if (cancelListener != null)
+                        cancelListener.onDialogNegativeClick(this);
+                    else
+                        dismiss();
+                });
 
         return builder.create();
     }

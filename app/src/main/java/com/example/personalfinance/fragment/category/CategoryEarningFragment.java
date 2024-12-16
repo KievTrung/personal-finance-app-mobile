@@ -17,11 +17,11 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.personalfinance.R;
+import com.example.personalfinance.error.MessageCode;
 import com.example.personalfinance.fragment.category.adapter.CategoryRecyclerViewAdapter;
+import com.example.personalfinance.fragment.category.model.CategoryModel;
 import com.example.personalfinance.fragment.category.viewmodel.EarningCategoryViewModel;
 import com.example.personalfinance.fragment.dialog.ConfirmDialogFragment;
-
-import java.util.ArrayList;
 
 public class CategoryEarningFragment extends Fragment {
     private static final String TAG = "kiev";
@@ -32,7 +32,6 @@ public class CategoryEarningFragment extends Fragment {
     @SuppressLint("CheckResult")
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate: earning");
         super.onCreate(savedInstanceState);
 
         //init view model
@@ -53,13 +52,12 @@ public class CategoryEarningFragment extends Fragment {
             //cancel update and delete if this category has any transaction associating
             viewModel.compositeDisposable.add(
                     viewModel
-                            .countTransact(viewModel.getEarnings().get(position).getId())
+                            .countTransactAndBudget(viewModel.getEarnings().get(position).getId())
                             .subscribe(count -> {
                                 if (count != 0)
-                                    Toast.makeText(requireContext(), "This category has at least 1 transaction using, can not modify", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(requireContext(), MessageCode.use_category, Toast.LENGTH_LONG).show();
                                 else {
-                                    CategoryDialogFragment dialog = CategoryDialogFragment
-                                            .newInstance(CategoryDialogFragment.Action.update, viewModel.getEarnings().get(position));
+                                    CategoryDialogFragment dialog = new CategoryDialogFragment(CategoryDialogFragment.Action.update, viewModel.getEarnings().get(position));
                                     dialog.setPositiveUpdate(this::onDialogPositiveClick);
                                     dialog.setNeutral(this::onDialogNeutralClick);
                                     dialog.show(getParentFragmentManager(), TAG);
@@ -91,25 +89,24 @@ public class CategoryEarningFragment extends Fragment {
     }
 
     @SuppressLint("CheckResult")
-    public void onDialogPositiveClick(DialogFragment dialog, CategoryModel categoryModel) {
+    public void onDialogPositiveClick(DialogFragment dialog, CategoryModel categoryModel, String oldTitle) {
         //update
 
         ConfirmDialogFragment confirm = ConfirmDialogFragment.newInstance("Confirm updating ?");
 
         confirm.setNoticeDialogListener((confirmDialog) -> {
-            //todo: need dispose
             viewModel.compositeDisposable.add(
                     viewModel.update(categoryModel)
                             .andThen(viewModel.fetchCategory())
                             .subscribe(categoryModels -> {
-                                        Toast.makeText(requireContext(), "Updating successfully", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(requireContext(), MessageCode.success_updation, Toast.LENGTH_LONG).show();
                                         adapter.update(categoryModels);
                                     }
                                     , throwable -> {
-                                        Log.d(TAG, "onError, update earning: " + throwable.getMessage());
-                                        Toast.makeText(requireContext(), "Updating failed", Toast.LENGTH_SHORT).show();
+                                        viewModel.setTitle(categoryModel.getId(), oldTitle);
+                                        Toast.makeText(requireContext(), MessageCode.fail_updation, Toast.LENGTH_SHORT).show();
                                         if (throwable.getMessage().contains("UNIQUE"))
-                                            Toast.makeText(requireContext(), "This category has existed, please try again", Toast.LENGTH_LONG).show();
+                                            Toast.makeText(requireContext(), MessageCode.category_duplicated, Toast.LENGTH_LONG).show();
                                         else
                                             Toast.makeText(requireContext(), throwable.getMessage(), Toast.LENGTH_LONG).show();
                                     })
@@ -126,12 +123,11 @@ public class CategoryEarningFragment extends Fragment {
         ConfirmDialogFragment confirm = ConfirmDialogFragment.newInstance("Confirm delete ?");
 
         confirm.setNoticeDialogListener((confirmDialog) -> {
-            //todo: need dispose
             viewModel.compositeDisposable.add(
                     viewModel.delete(categoryModel)
                             .andThen(viewModel.fetchCategory())
                             .subscribe(categoryModels -> {
-                                        Toast.makeText(requireContext(), "Deletting successfully", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(requireContext(), MessageCode.success_deletion, Toast.LENGTH_LONG).show();
                                         adapter.update(categoryModels);
                                     }
                                     , throwable -> Log.d(TAG, "onError, delete category: " + throwable.getMessage()))

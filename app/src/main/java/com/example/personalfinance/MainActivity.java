@@ -1,11 +1,18 @@
 package com.example.personalfinance;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
-import android.text.Spanned;
 import android.text.TextWatcher;
 import android.transition.TransitionInflater;
 import android.util.Log;
@@ -15,33 +22,49 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.OnBackPressedDispatcher;
+import androidx.annotation.LongDef;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.personalfinance.datalayer.local.entity.Item;
+import com.example.personalfinance.datalayer.local.entity.Notify;
 import com.example.personalfinance.datalayer.local.enums.Currency;
-import com.example.personalfinance.fragment.account.AccountFragment;
-import com.example.personalfinance.fragment.BudgetFragment;
-import com.example.personalfinance.fragment.LoanDebtFragment;
-import com.example.personalfinance.fragment.NotificationFragment;
-import com.example.personalfinance.fragment.SettingFragment;
-import com.example.personalfinance.fragment.transaction.transaction.TransactionFragment;
-import com.example.personalfinance.fragment.transaction.wallet.WalletFragment;
+import com.example.personalfinance.error.MessageCode;
+import com.example.personalfinance.fragment.dialog.ConfirmDialogFragment;
+import com.example.personalfinance.fragment.entry.EntryFragment;
+import com.example.personalfinance.fragment.setting.SettingFragment;
+import com.example.personalfinance.fragment.budget.BudgetFragment;
+import com.example.personalfinance.fragment.notify.NotificationFragment;
+import com.example.personalfinance.fragment.setting.repository.UserRepository;
+import com.example.personalfinance.fragment.transaction.TransactionFragment;
+import com.example.personalfinance.fragment.transaction.model.ItemModel;
+import com.example.personalfinance.fragment.wallet.WalletFragment;
 import com.google.android.material.navigation.NavigationView;
 
-import java.text.DecimalFormat;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = "kiev main";
@@ -50,18 +73,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private NavigationView nv;
     private MainActivityViewModel viewModel;
 
-    private enum FRAGMENT{
+    private enum FRAGMENT {
         FRAGMENT_TRANSACTION,
         FRAGMENT_WALLET,
-        FRAGMENT_ACCOUNT,
         FRAGMENT_BUDGET,
         FRAGMENT_NOTIFY,
         FRAGMENT_SETTING,
-        FRAGMENT_LOAN_DEBT;
+        FRAGMENT_ENTRY,
     }
 
     private FRAGMENT currentFragment = FRAGMENT.FRAGMENT_TRANSACTION;
 
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,10 +95,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        init();
-    }
 
-    private void init(){
         //init view model
         viewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
 
@@ -85,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         setSupportActionBar(tb);
 
-        findViewById(R.id.toolbar_menu).setOnClickListener((v)-> dl.openDrawer(Gravity.LEFT));
+        findViewById(R.id.toolbar_menu).setOnClickListener((v) -> dl.openDrawer(Gravity.LEFT));
 
         nv.bringToFront();
         nv.setNavigationItemSelectedListener(this);
@@ -94,15 +114,113 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         onBackPressedDispatcher.addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (dl.isDrawerOpen(GravityCompat.START)){
+                if (dl.isDrawerOpen(GravityCompat.START)) {
                     dl.closeDrawer(GravityCompat.START);
                 }
             }
         });
+        init();
+    }
 
-//        initOpenFragment();
-        replaceFragment(new AccountFragment(), false, null);
-        currentFragment = FRAGMENT.FRAGMENT_ACCOUNT;
+    private void init() {
+
+        //respond to a budget exceeded notification
+        Intent intent = getIntent();
+        int budgetId = intent.getIntExtra("budgetid", -1);
+        long notifyid = intent.getLongExtra("notifyid", -1);
+        if (budgetId != -1){
+            Bundle bundle = new Bundle();
+            bundle.putInt("payloadbudget", budgetId);
+            bundle.putLong("payloadnotify", notifyid);
+            getSupportFragmentManager().setFragmentResult("budgetid", bundle);
+
+            replaceFragment(new BudgetFragment(), false, null);
+            currentFragment = FRAGMENT.FRAGMENT_BUDGET;
+        }
+        else{
+            //default entry fragment
+            replaceFragment(new EntryFragment(), false, null);
+            currentFragment = FRAGMENT.FRAGMENT_ENTRY;
+        }
+    }
+
+    //notification
+    public static class NotifyObject {
+        public Integer id;
+        public Notification notification;
+
+        public NotifyObject(Integer id, Notification notification) {
+            this.id = id;
+            this.notification = notification;
+        }
+    }
+    private static final String CHANNEL_ID = "app_channel";
+    private static final String GROUP_ID = "app_group";
+
+    public void showNotification(List<NotifyObject> notifyObjects) {
+
+        if (!notifyObjects.isEmpty()){
+            //show dialog
+            ConfirmDialogFragment dialog = ConfirmDialogFragment.newInstance("Your budget have exceeded by creating this transaction\nPlease check notification");
+            dialog.setNoticeDialogListener(DialogFragment::dismiss);
+            dialog.show(getSupportFragmentManager(), null);
+        }
+        else return;
+
+        viewModel.compositeDisposable.add(
+                viewModel.getNotifyPermission().subscribe(permission -> {
+                    if (permission && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return;
+
+                    //set up notify channel
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "MY CHANNEL", NotificationManager.IMPORTANCE_DEFAULT);
+                        NotificationManager manager = MainActivity.this.getSystemService(NotificationManager.class);
+                        manager.createNotificationChannel(channel);
+                    }
+
+                    Notify summaryNotify = new Notify();
+                    summaryNotify.setHeader("Budget exceeded");
+                    summaryNotify.setContent("Click to view detail");
+                    summaryNotify.setType(Notify.Type.budget);
+
+                    //post notify
+                    NotificationManagerCompat managerCompat = NotificationManagerCompat.from(this);
+                    if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED){
+                        for (NotifyObject notify : notifyObjects)
+                            managerCompat.notify(notify.id, notify.notification);
+                        managerCompat.notify(0, createNotification(getApplicationContext(), summaryNotify, null, true));
+                    }
+                })
+        );
+
+    }
+
+    public static Notification createNotification(Context context, @NonNull Notify notify, @Nullable Intent intent, boolean isGroupSummary) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(setNotifyIcon(notify.getType()))
+                .setContentTitle(notify.getHeader())
+                .setContentText(notify.getContent())
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(notify.getContent()))
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+                .setGroup(GROUP_ID)
+                .setGroupSummary(isGroupSummary)
+                .setOnlyAlertOnce(true)
+                .setAutoCancel(true);
+
+        if (intent != null) {
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_MUTABLE);
+            builder.setContentIntent(pendingIntent);
+        }
+        return builder.build();
+    }
+
+    public static int setNotifyIcon(Notify.Type type){
+        switch(type){
+            default:
+                return R.drawable.notifications;
+        }
     }
 
     public void replaceFragment(Fragment fragment, boolean addBackStack, Bundle args){
@@ -165,6 +283,63 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         );
     }
 
+    public boolean checkTitle(String title){
+        if (title == null || title.isEmpty()) {
+            Toast.makeText(this, MessageCode.field_title_required, Toast.LENGTH_LONG).show();
+            return false;
+        }
+        title = title.trim();
+        //only alow alphabet
+        if (Pattern.compile("\\d+").matcher(title).find()) {
+            Toast.makeText(this, MessageCode.field_title_alpha_only, Toast.LENGTH_LONG).show();
+            /*error*/
+            return false;
+        }
+        //check length
+        if (title.length() > 20 || title.length() < 5){
+            /*error*/
+            Toast.makeText(this, MessageCode.field_title_char_length_allow, Toast.LENGTH_LONG).show();
+            return false;
+        }
+        return true;
+    }
+
+    public boolean checkAmount(String amount, Currency currency){
+        if (amount == null || amount.isEmpty()) {
+            Toast.makeText(this, MessageCode.field_amount_required, Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        amount = amount.trim();
+        double amount_ = Double.parseDouble(amount);
+        //check amount
+        if ((currency == Currency.vnd && amount_ == 0d) || (currency == Currency.usd && amount_ == 0.00d)
+                || UserRepository.backCurrency(amount_, currency) > MessageCode.amount_limit){
+            Toast.makeText(this, MessageCode.field_amount_limit_allow, Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        /*pass*/
+        return true;
+    }
+
+    public boolean isExceedBillion(@NonNull List<ItemModel> itemModels){
+        BigDecimal sum = BigDecimal.ZERO;
+
+        for(ItemModel itemModel : itemModels)
+            sum = sum.add(BigDecimal.valueOf(itemModel.getItem_price()).multiply(BigDecimal.valueOf(itemModel.getQuantity())));
+
+        return sum.doubleValue() > MessageCode.amount_limit;
+    }
+
+    public boolean checkDescription(String description){
+        if (description != null && description.trim().length() > 40){
+            Toast.makeText(this, MessageCode.field_description_max_char, Toast.LENGTH_LONG).show();
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
@@ -176,10 +351,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             replaceFragment(new BudgetFragment(), false, null);
             currentFragment = FRAGMENT.FRAGMENT_BUDGET;
         }
-        else if (id == R.id.nav_loan_debt && currentFragment != FRAGMENT.FRAGMENT_LOAN_DEBT){
-            replaceFragment(new LoanDebtFragment(), false, null);
-            currentFragment = FRAGMENT.FRAGMENT_LOAN_DEBT;
-        }
         else if (id == R.id.nav_notify && currentFragment != FRAGMENT.FRAGMENT_NOTIFY){
             replaceFragment(new NotificationFragment(), false, null);
             currentFragment = FRAGMENT.FRAGMENT_NOTIFY;
@@ -188,11 +359,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             replaceFragment(new SettingFragment(), false, null);
             currentFragment = FRAGMENT.FRAGMENT_SETTING;
         }
-        else if (id == R.id.nav_account && currentFragment != FRAGMENT.FRAGMENT_ACCOUNT){
-            replaceFragment(new AccountFragment(), false, null);
-            currentFragment = FRAGMENT.FRAGMENT_ACCOUNT;
-        }
-        Log.d(TAG, "Run fragment: " + currentFragment);
         //close drawer
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

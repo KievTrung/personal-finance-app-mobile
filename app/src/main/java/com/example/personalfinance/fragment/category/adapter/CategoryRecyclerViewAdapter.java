@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.personalfinance.R;
-import com.example.personalfinance.fragment.category.CategoryModel;
+import com.example.personalfinance.fragment.category.model.CategoryModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ public class CategoryRecyclerViewAdapter extends RecyclerView.Adapter<CategoryRe
     @NonNull
     @Override
     public CategoryRecyclerViewAdapter.SpendingViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_views_row_category, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_view_row_category, parent, false);
         return new CategoryRecyclerViewAdapter.SpendingViewHolder(view);
     }
 

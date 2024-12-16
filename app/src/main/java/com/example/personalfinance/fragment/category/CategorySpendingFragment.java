@@ -17,11 +17,11 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.personalfinance.R;
+import com.example.personalfinance.error.MessageCode;
 import com.example.personalfinance.fragment.category.adapter.CategoryRecyclerViewAdapter;
+import com.example.personalfinance.fragment.category.model.CategoryModel;
 import com.example.personalfinance.fragment.category.viewmodel.SpendingCategoryViewModel;
 import com.example.personalfinance.fragment.dialog.ConfirmDialogFragment;
-
-import java.util.ArrayList;
 
 public class CategorySpendingFragment extends Fragment{
     private static final String TAG = "kiev ui";
@@ -32,7 +32,6 @@ public class CategorySpendingFragment extends Fragment{
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate: spending");
 
         //init view model
         viewModel = new ViewModelProvider(requireActivity()).get(SpendingCategoryViewModel.class);
@@ -49,16 +48,16 @@ public class CategorySpendingFragment extends Fragment{
         });
         adapter.setItemOnLongClickListener(position -> {
             //update and delete category
-            //cancel update and delete if this category has any transaction associating
+            //cancel update and delete if this category has any transaction or budget associating
             viewModel.compositeDisposable.add(
                     viewModel
-                            .countTransact(viewModel.getSpendings().get(position).getId())
+                            .countTransactAndBudget(viewModel.getSpendings().get(position).getId())
                             .subscribe(count -> {
                                 if (count != 0)
-                                    Toast.makeText(requireContext(), "This category has at least 1 transaction using, can not modify", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(requireContext(), MessageCode.use_category, Toast.LENGTH_LONG).show();
                                 else {
-                                    CategoryDialogFragment dialog = CategoryDialogFragment
-                                            .newInstance(CategoryDialogFragment.Action.update, viewModel.getSpendings().get(position));
+                                    Log.d(TAG, "onCreate: " + viewModel.getSpendings().get(position));
+                                    CategoryDialogFragment dialog = new CategoryDialogFragment(CategoryDialogFragment.Action.update, viewModel.getSpendings().get(position));
                                     dialog.setPositiveUpdate(this::onDialogPositiveUpdateClick);
                                     dialog.setNeutral(this::onDialogNeutralClick);
                                     dialog.show(getParentFragmentManager(), TAG);
@@ -90,24 +89,24 @@ public class CategorySpendingFragment extends Fragment{
     }
 
     @SuppressLint("CheckResult")
-    public void onDialogPositiveUpdateClick(DialogFragment dialog, CategoryModel categoryModel) {
+    public void onDialogPositiveUpdateClick(DialogFragment dialog, CategoryModel categoryModel, String oldTitle) {
         //update
 
         ConfirmDialogFragment confirm = ConfirmDialogFragment.newInstance("Confirm updating ?");
 
-        confirm.setNoticeDialogListener((confirmDialog) -> {
+        confirm.setNoticeDialogListener(confirmDialog -> {
             viewModel.compositeDisposable.add(
                     viewModel.update(categoryModel)
                             .andThen(viewModel.fetchCategory())
                             .subscribe(categoryModels -> {
-                                        Toast.makeText(requireContext(), "Updating successfully", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(requireContext(), MessageCode.success_updation, Toast.LENGTH_LONG).show();
                                         adapter.update(categoryModels);
                                     }
                                     , throwable -> {
-                                        Log.d(TAG, "onError, update spending: " + throwable.getMessage());
-                                        Toast.makeText(requireContext(), "Updating failed", Toast.LENGTH_SHORT).show();
+                                        viewModel.setTitle(categoryModel.getId(), oldTitle);
+                                        Toast.makeText(requireContext(), MessageCode.fail_updation, Toast.LENGTH_SHORT).show();
                                         if (throwable.getMessage().contains("UNIQUE"))
-                                            Toast.makeText(requireContext(), "This category has existed, please try again", Toast.LENGTH_LONG).show();
+                                            Toast.makeText(requireContext(), MessageCode.category_duplicated, Toast.LENGTH_LONG).show();
                                         else
                                             Toast.makeText(requireContext(), throwable.getMessage(), Toast.LENGTH_LONG).show();
                                     })
@@ -128,9 +127,9 @@ public class CategorySpendingFragment extends Fragment{
                     viewModel.delete(categoryModel)
                             .andThen(viewModel.fetchCategory())
                             .subscribe(categoryModels -> {
-                                Toast.makeText(requireContext(), "Deleting successfully", Toast.LENGTH_LONG).show();
+                                Toast.makeText(requireContext(), MessageCode.success_deletion, Toast.LENGTH_LONG).show();
                                 adapter.update(categoryModels);
-                            }, throwable -> Log.d(TAG, "onError, insertTransact category: " + throwable.getMessage()))
+                            }, throwable -> Log.d(TAG, "onError, delete category: " + throwable.getMessage()))
             );
             confirmDialog.dismiss();
             dialog.dismiss();

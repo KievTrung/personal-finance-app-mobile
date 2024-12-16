@@ -15,12 +15,9 @@ import com.example.personalfinance.datalayer.local.daos.AppLocalDatabase;
 import com.example.personalfinance.datalayer.local.daos.TokenDao;
 import com.example.personalfinance.datalayer.local.daos.TransactDao;
 import com.example.personalfinance.datalayer.local.daos.WalletDao;
-import com.example.personalfinance.datalayer.local.entities.auxiliry.Token;
-import com.example.personalfinance.datalayer.local.entities.Transact;
-import com.example.personalfinance.datalayer.local.repositories.WalletRepository;
-import com.example.personalfinance.fragment.transaction.wallet.WalletModel;
-
-import java.time.LocalDateTime;
+import com.example.personalfinance.datalayer.local.entity.auxiliry.Token;
+import com.example.personalfinance.fragment.wallet.repository.WalletRepository;
+import com.example.personalfinance.fragment.transaction_.wallet.model.WalletModel;
 
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {

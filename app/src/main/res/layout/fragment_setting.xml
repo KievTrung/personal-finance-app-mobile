@@ -1,16 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fragment_setting"
+    android:id="@+id/fragment_account"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment.SettingFragment">
+    android:orientation="vertical"
+    tools:context=".fragment.setting.SettingFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Setting Fragment"
-        android:textSize="34dp" />
 
-</FrameLayout>
+    <Button
+        android:id="@+id/switch_currency"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="currency" />
+
+    <Button
+        android:id="@+id/show_notification"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="notify" />
+
+    <Button
+        android:id="@+id/report"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="report" />
+
+</LinearLayout>

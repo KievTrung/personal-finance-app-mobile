@@ -27,7 +27,7 @@
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/fragment_container"
-            android:name="com.example.personalfinance.fragment.transaction.transaction.TransactionFragment"
+            android:name="com.example.personalfinance.fragment.transaction.TransactionFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 

@@ -31,6 +31,9 @@ android {
     }
 }
 dependencies {
+    implementation(libs.legacy.support.v4)
+    implementation(libs.lifecycle.livedata.ktx)
+    implementation(libs.lifecycle.viewmodel.ktx)
     val room_version = "2.6.1"
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.room:room-rxjava3:$room_version")
@@ -46,6 +49,8 @@ dependencies {
     implementation("androidx.drawerlayout:drawerlayout:1.2.0")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     testImplementation("androidx.test:core:1.6.1")
+    
+    implementation("androidx.core:core-ktx:1.15.0")
 
     implementation("com.aldoapps:autoformatedittext:0.9.3")
 
@@ -63,4 +68,6 @@ dependencies {
     implementation("androidx.work:work-rxjava3:2.10.0")
     implementation("androidx.work:work-runtime:2.10.0")
     implementation("androidx.work:work-testing:2.10.0")
+
+    implementation("com.github.mhiew:android-pdf-viewer:3.2.0-beta.1")
 }

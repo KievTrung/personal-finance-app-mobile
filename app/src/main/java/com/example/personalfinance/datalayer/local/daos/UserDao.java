@@ -3,9 +3,8 @@ package com.example.personalfinance.datalayer.local.daos;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
-import androidx.room.Update;
 
-import com.example.personalfinance.datalayer.local.entities.User;
+import com.example.personalfinance.datalayer.local.entity.User;
 import com.example.personalfinance.datalayer.local.enums.Currency;
 
 import io.reactivex.rxjava3.core.Completable;
@@ -22,8 +21,8 @@ public interface UserDao {
     @Query("delete from user")
     void deleteUser();
 
-    @Update
-    Completable updateUser(User user);
+    @Query("select count(*) from user limit 1")
+    Single<Integer> countUser();
 
     @Query("update user set currency = :currency")
     Completable setCurrency(Currency currency);
@@ -33,4 +32,10 @@ public interface UserDao {
 
     @Query("select currency from user limit 1")
     Currency getCurrency();
+
+    @Query("select notifyPermission from user limit 1")
+    Single<Boolean> getNotifyPermission();
+
+    @Query("update user set notifyPermission = :notify")
+    Completable setNotifyPermission(boolean notify);
 }

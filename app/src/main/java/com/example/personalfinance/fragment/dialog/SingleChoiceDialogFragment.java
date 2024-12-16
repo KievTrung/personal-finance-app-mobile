@@ -10,7 +10,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 public class SingleChoiceDialogFragment extends DialogFragment {
-    private static final String TAG = "SingleChoiceDialogFragm";
     private String[] choices;
     private String choice;
     private int checkedItem;
@@ -20,13 +19,9 @@ public class SingleChoiceDialogFragment extends DialogFragment {
     private DialogInterface.OnClickListener negativeListener = (dialog, i) -> dismiss();
     private DialogInterface.OnClickListener choiceBtnListener = (dialog, i) -> pickChoices(i);
 
-    public SingleChoiceDialogFragment(String title, String[] choices, int checkedItem) throws Exception {
-        if (choices.length < 2 || choices.length < checkedItem)
-            throw new Exception("choices length must be greater than 1");
-
+    public SingleChoiceDialogFragment(String title, String[] choices, int checkedItem){
         this.title = title;
         this.checkedItem = checkedItem;
-        this.positiveListener = positiveListener;
         this.choices = choices;
         this.choice = choices[checkedItem];
     }

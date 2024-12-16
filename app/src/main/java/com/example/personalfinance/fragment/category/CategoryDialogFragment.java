@@ -1,12 +1,9 @@
 package com.example.personalfinance.fragment.category;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -16,7 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.personalfinance.R;
-import com.example.personalfinance.datalayer.local.enums.CategoryType;
+import com.example.personalfinance.fragment.category.model.CategoryModel;
 
 public class CategoryDialogFragment extends DialogFragment{
     private static final String TAG = "kiev";
@@ -25,17 +22,14 @@ public class CategoryDialogFragment extends DialogFragment{
     private PositiveUpdateDialogListener positiveUpdate;
     private EditText editText;
     private TextView textView;
+    private Action action;
+    private CategoryModel categoryModel;
 
     enum Action{insert, update}
 
-    static CategoryDialogFragment newInstance(Action action, CategoryModel categoryModel){
-        CategoryDialogFragment categoryDialogFragment = new CategoryDialogFragment();
-
-        Bundle bundle = new Bundle();
-        bundle.putString("action", action.name());
-        bundle.putSerializable("category", categoryModel);
-        categoryDialogFragment.setArguments(bundle);
-        return categoryDialogFragment;
+    public CategoryDialogFragment(Action action, CategoryModel categoryModel){
+        this.action = action;
+        this.categoryModel = categoryModel;
     }
 
     public interface PositiveDialogListener {
@@ -47,7 +41,7 @@ public class CategoryDialogFragment extends DialogFragment{
     }
 
     public interface PositiveUpdateDialogListener {
-        void onDialogPositiveClick(DialogFragment dialog, CategoryModel categoryModel);
+        void onDialogPositiveClick(DialogFragment dialog, CategoryModel categoryModel, String oldTitle);
     }
 
     public void setPositive(PositiveDialogListener positive) {
@@ -67,9 +61,6 @@ public class CategoryDialogFragment extends DialogFragment{
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        //get action from bundle
-        Action action = Action.valueOf(getArguments().getString("action"));
-
         View v = requireActivity().getLayoutInflater().inflate(R.layout.dialog_new_category, null);
 
         editText = v.findViewById(R.id.editText_category_title);
@@ -80,16 +71,15 @@ public class CategoryDialogFragment extends DialogFragment{
 
         switch (action){
             case update:
-                CategoryModel updateCategory = (CategoryModel) getArguments().getSerializable("category");
+                String oldTitle = categoryModel.getName();
                 builder.setTitle("Update category")
                         .setPositiveButton("Save", (dialog, which) -> {
-                            Log.d(TAG, "onCreateDialog: category " + updateCategory + ", title: " + editText.getText().toString());
-                            updateCategory.setName(editText.getText().toString());
-                            positiveUpdate.onDialogPositiveClick(CategoryDialogFragment.this, updateCategory);
+                            categoryModel.setName(editText.getText().toString());
+                            positiveUpdate.onDialogPositiveClick(CategoryDialogFragment.this, categoryModel, oldTitle);
                         })
-                        .setNeutralButton("Delete", (dialog, which) -> neutral.onDialogNeutralClick(this, updateCategory));
+                        .setNeutralButton("Delete", (dialog, which) -> neutral.onDialogNeutralClick(this, categoryModel));
                 textView.setVisibility(View.VISIBLE);
-                textView.setText("Old title: " + updateCategory.getName());
+                textView.setText("Old title: " + oldTitle);
                 break;
             case insert:
                 builder.setTitle("New category")
